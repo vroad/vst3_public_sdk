@@ -12,6 +12,11 @@ This application is part of the VST 3 SDK package. It is created with the VST 3 
 
 > See the top-level README of the VST 3 SDK: https://github.com/steinbergmedia/vst3sdk.git
 
+### Jack Support
+
+If the Jack development files are available when building the SDK, EditorHost can process audio via Jack.
+Start the application with the `--jack` command‑line option to enable this feature.
+
 ## Getting Help
 
 * Read through the SDK documentation on the **[VST 3 Developer Portal](https://steinbergmedia.github.io/vst3_dev_portal/pages/index.html)**

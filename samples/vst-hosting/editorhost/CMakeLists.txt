@@ -1,5 +1,6 @@
 
 if(SMTG_ENABLE_VST3_HOSTING_EXAMPLES)
+    include(SMTG_FindJack)
 
     set(editorhost_sources
         ${SDK_ROOT}/public.sdk/source/vst/hosting/plugprovider.cpp
@@ -12,6 +13,16 @@ if(SMTG_ENABLE_VST3_HOSTING_EXAMPLES)
         source/platform/iwindow.h
         source/usediids.cpp
     )
+
+    if(${LIBJACK_FOUND})
+        list(APPEND editorhost_sources
+            source/media/audioclient.cpp
+            source/media/audioclient.h
+            source/media/imediaserver.h
+            source/media/iparameterclient.h
+            source/media/jack/jackclient.cpp
+        )
+    endif()
 
     if(SMTG_MAC)
         set(editorhost_sources
@@ -94,7 +105,14 @@ if(SMTG_ENABLE_VST3_HOSTING_EXAMPLES)
         PRIVATE
             sdk_hosting
             ${editorhost_PLATFORM_LIBS}
+            $<$<BOOL:${LIBJACK_FOUND}>:${LIBJACK_LIBRARY}>
     )
+    if(${LIBJACK_FOUND})
+        target_include_directories(${target}
+            PRIVATE
+                ${LIBJACK_INCLUDE_DIR}
+        )
+    endif()
     smtg_target_setup_universal_binary(${target})
     if (APP_PROPERTIES)
         set_target_properties(${target}

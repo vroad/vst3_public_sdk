@@ -2,10 +2,10 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : EditorHost
-// Filename    : public.sdk/samples/vst-hosting/editorhost/source/editorhost.h
+// Category    : AudioHost
+// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/imediaserver.h
 // Created by  : Steinberg 09.2016
-// Description : Example of opening a Plug-in editor
+// Description : Audio Host Example for VST 3
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -37,48 +37,82 @@
 
 #pragma once
 
-#include "public.sdk/samples/vst-hosting/editorhost/source/platform/iapplication.h"
-#include "public.sdk/samples/vst-hosting/editorhost/source/platform/iwindow.h"
-#include "public.sdk/source/vst/hosting/hostclasses.h"
-#include "public.sdk/source/vst/hosting/module.h"
-#include "public.sdk/source/vst/hosting/plugprovider.h"
-#include "public.sdk/source/vst/utility/optional.h"
-#include "public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.h"
+#include <memory>
+#include <string>
+#include <vector>
+#include <pluginterfaces/vst/vsttypes.h>
 
-//------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-namespace EditorHost {
+using IOName = std::string;
+using IONames = std::vector<IOName>;
+using AudioClientName = std::string;
 
-class WindowController;
-
-//------------------------------------------------------------------------
-class App : public IApplication
+struct IAudioClient
 {
-public:
-	~App () noexcept override;
-	void init (const std::vector<std::string>& cmdArgs) override;
-	void terminate () override;
-
-private:
-	enum OpenFlags
+	struct Buffers
 	{
-		kSetComponentHandler = 1 << 0,
-		kSecondWindow = 1 << 1,
+		float** inputs;
+		int32_t numInputs;
+		float** outputs;
+		int32_t numOutputs;
+		int32_t numSamples;
 	};
-	void openEditor (const std::string& path, VST3::Optional<VST3::UID> effectID, uint32 flags);
-        void createViewAndShow (IEditController* controller);
-        void startAudioClient ();
 
-	VST3::Hosting::Module::Ptr module {nullptr};
-	IPtr<PlugProvider> plugProvider {nullptr};
-        Vst::HostApplication pluginContext;
-        WindowPtr window;
-        std::shared_ptr<WindowController> windowController;
-        AudioClientPtr audioClient;
+	struct IOSetup
+	{
+		IONames inputs;
+		IONames outputs;
+	};
+
+	virtual bool process (Buffers& buffers, int64_t continousFrames) = 0;
+	virtual bool setSamplerate (SampleRate value) = 0;
+	virtual bool setBlockSize (int32 value) = 0;
+	virtual IOSetup getIOSetup () const = 0;
+
+	virtual ~IAudioClient () {}
 };
 
-//------------------------------------------------------------------------
-} // EditorHost
+//----------------------------------------------------------------------------------
+struct IMidiClient
+{
+	using MidiData = uint8_t;
+
+	struct Event
+	{
+		MidiData type;
+		MidiData channel;
+		MidiData data0;
+		MidiData data1;
+		int64_t timestamp;
+	};
+
+	struct IOSetup
+	{
+		IONames inputs;
+		IONames outputs;
+	};
+
+	virtual bool onEvent (const Event& event, int32_t port) = 0;
+	virtual IOSetup getMidiIOSetup () const = 0;
+
+	virtual ~IMidiClient () {}
+};
+
+//----------------------------------------------------------------------------------
+struct IMediaServer
+{
+	virtual bool registerAudioClient (IAudioClient* client) = 0;
+	virtual bool registerMidiClient (IMidiClient* client) = 0;
+
+	virtual ~IMediaServer () {}
+};
+
+//----------------------------------------------------------------------------------
+using IMediaServerPtr = std::shared_ptr<IMediaServer>;
+
+IMediaServerPtr createMediaServer (const AudioClientName& name);
+//----------------------------------------------------------------------------------
 } // Vst
 } // Steinberg

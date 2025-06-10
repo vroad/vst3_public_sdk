@@ -250,25 +250,41 @@ void App::createViewAndShow (IEditController* controller)
 		IPlatform::instance ().kill (-1, "Could not create window");
 	}
 
-	window->show ();
+        window->show ();
+}
+
+//------------------------------------------------------------------------
+void App::startAudioClient ()
+{
+        if (!plugProvider)
+                return;
+
+        OPtr<IComponent> component = plugProvider->getComponent ();
+        OPtr<IEditController> controller = plugProvider->getController ();
+        auto midiMapping = U::cast<IMidiMapping> (controller);
+
+        audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping);
 }
 
 //------------------------------------------------------------------------
 void App::init (const std::vector<std::string>& cmdArgs)
 {
-	VST3::Optional<VST3::UID> uid;
-	uint32 flags {};
-	for (auto it = cmdArgs.begin (), end = cmdArgs.end (); it != end; ++it)
-	{
-		if (*it == "--componentHandler")
-			flags |= kSetComponentHandler;
-		else if (*it == "--secondWindow")
-			flags |= kSecondWindow;
-		else if (*it == "--uid")
-		{
-			if (++it != end)
-				uid = VST3::UID::fromString (*it);
-			if (!uid)
+        VST3::Optional<VST3::UID> uid;
+        uint32 flags {};
+        bool jackAudio {false};
+        for (auto it = cmdArgs.begin (), end = cmdArgs.end (); it != end; ++it)
+        {
+                if (*it == "--componentHandler")
+                        flags |= kSetComponentHandler;
+                else if (*it == "--secondWindow")
+                        flags |= kSecondWindow;
+                else if (*it == "--jack")
+                        jackAudio = true;
+                else if (*it == "--uid")
+                {
+                        if (++it != end)
+                                uid = VST3::UID::fromString (*it);
+                        if (!uid)
 				IPlatform::instance ().kill (-1, "wrong argument to --uid");
 		}
 	}
@@ -287,15 +303,20 @@ options:
 	create a second window
 
 --uid UID
-	use effect class with unique class ID==UID
+        use effect class with unique class ID==UID
+--jack
+        enable Jack audio
 )";
 
 		IPlatform::instance ().kill (0, helpText);
 	}
 
-	PluginContextFactory::instance ().setPluginContext (&pluginContext);
+        PluginContextFactory::instance ().setPluginContext (&pluginContext);
 
-	openEditor (cmdArgs.back (), std::move (uid), flags);
+        openEditor (cmdArgs.back (), std::move (uid), flags);
+
+        if (jackAudio)
+                startAudioClient ();
 }
 
 //------------------------------------------------------------------------

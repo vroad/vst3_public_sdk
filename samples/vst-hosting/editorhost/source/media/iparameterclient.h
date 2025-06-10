@@ -2,10 +2,10 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : EditorHost
-// Filename    : public.sdk/samples/vst-hosting/editorhost/source/editorhost.h
+// Category    : AudioHost
+// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/iparameterclient.h
 // Created by  : Steinberg 09.2016
-// Description : Example of opening a Plug-in editor
+// Description : Audio Host Example for VST 3
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -37,48 +37,23 @@
 
 #pragma once
 
-#include "public.sdk/samples/vst-hosting/editorhost/source/platform/iapplication.h"
-#include "public.sdk/samples/vst-hosting/editorhost/source/platform/iwindow.h"
-#include "public.sdk/source/vst/hosting/hostclasses.h"
-#include "public.sdk/source/vst/hosting/module.h"
-#include "public.sdk/source/vst/hosting/plugprovider.h"
-#include "public.sdk/source/vst/utility/optional.h"
-#include "public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.h"
+#include <memory>
+#include <pluginterfaces/vst/vsttypes.h>
 
-//------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-namespace EditorHost {
 
-class WindowController;
-
-//------------------------------------------------------------------------
-class App : public IApplication
+//----------------------------------------------------------------------------------
+struct IParameterClient
 {
-public:
-	~App () noexcept override;
-	void init (const std::vector<std::string>& cmdArgs) override;
-	void terminate () override;
+	virtual void setParameter (ParamID id, ParamValue value, int32 sampleOffset) = 0;
 
-private:
-	enum OpenFlags
-	{
-		kSetComponentHandler = 1 << 0,
-		kSecondWindow = 1 << 1,
-	};
-	void openEditor (const std::string& path, VST3::Optional<VST3::UID> effectID, uint32 flags);
-        void createViewAndShow (IEditController* controller);
-        void startAudioClient ();
-
-	VST3::Hosting::Module::Ptr module {nullptr};
-	IPtr<PlugProvider> plugProvider {nullptr};
-        Vst::HostApplication pluginContext;
-        WindowPtr window;
-        std::shared_ptr<WindowController> windowController;
-        AudioClientPtr audioClient;
+	virtual ~IParameterClient () {}
 };
+//----------------------------------------------------------------------------------
+using IParameterClientPtr = std::weak_ptr<IParameterClient>;
 
-//------------------------------------------------------------------------
-} // EditorHost
+//----------------------------------------------------------------------------------
 } // Vst
 } // Steinberg
