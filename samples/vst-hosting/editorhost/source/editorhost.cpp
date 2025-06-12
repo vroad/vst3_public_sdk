@@ -45,6 +45,7 @@
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/vsttypes.h"
+#include <cassert>
 #include <cstdio>
 #include <iostream>
 
@@ -250,20 +251,21 @@ void App::createViewAndShow (IEditController* controller)
 		IPlatform::instance ().kill (-1, "Could not create window");
 	}
 
-        window->show ();
+    window->show ();
 }
 
 //------------------------------------------------------------------------
 void App::startAudioClient ()
 {
-        if (!plugProvider)
-                return;
+	if (!plugProvider) {
+		return;
+	}
 
-        OPtr<IComponent> component = plugProvider->getComponent ();
-        OPtr<IEditController> controller = plugProvider->getController ();
-        auto midiMapping = U::cast<IMidiMapping> (controller);
+	OPtr<IComponent> component = plugProvider->getComponent ();
+	OPtr<IEditController> controller = plugProvider->getController ();
+	auto midiMapping = U::cast<IMidiMapping> (controller);
 
-        audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping);
+	audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping);
 }
 
 //------------------------------------------------------------------------
@@ -322,6 +324,7 @@ options:
 //------------------------------------------------------------------------
 void App::terminate ()
 {
+	audioClient.reset();
 	if (windowController)
 		windowController->closePlugView ();
 	windowController.reset ();
@@ -333,6 +336,7 @@ void App::terminate ()
 //------------------------------------------------------------------------
 WindowController::WindowController (const IPtr<IPlugView>& plugView) : plugView (plugView)
 {
+	assert(plugView != nullptr);
 }
 
 //------------------------------------------------------------------------

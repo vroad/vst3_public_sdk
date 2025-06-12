@@ -46,6 +46,7 @@
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/vsttypes.h"
+#include <cstddef>
 #include <cstdio>
 #include <iostream>
 
@@ -71,6 +72,7 @@ App::~App () noexcept
 void App::startAudioClient (const std::string& path, VST3::Optional<VST3::UID> effectID,
                             uint32 flags)
 {
+	PluginContextFactory::instance().setPluginContext(gStandardPluginContext);
 	std::string error;
 	module = VST3::Hosting::Module::create (path, error);
 	if (!module)
@@ -172,6 +174,8 @@ int main (int argc, char* argv[])
 
 	std::cout << "Press <enter> to continue . . .";
 	std::getchar ();
+
+	// Steinberg::Vst::AudioHost::gInit.app = nullptr;
 
 	return 0;
 }
