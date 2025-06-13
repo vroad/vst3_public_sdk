@@ -38,6 +38,9 @@
 #include "audioclient.h"
 
 #include "miditovst.h"
+#include "pluginterfaces/vst/ivstcomponent.h"
+#include "pluginterfaces/vst/vstspeaker.h"
+#include "pluginterfaces/vst/vsttypes.h"
 #include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
@@ -364,14 +367,19 @@ bool AudioClient::updateProcessSetup ()
 
 	if (processor->setupProcessing (setup) != kResultOk)
 		return false;
+	
+	if (component->activateBus (kAudio, kInput, 0, true)) {
+		return false;
+	}
+	if (component->activateBus (kAudio, kOutput, 0, true)) {
+		return false;
+	}
 
 	if (component->setActive (true) != kResultOk)
 		return false;
 
-	processor->setProcessing (true); // != kResultOk
-	/*
-if (processor->setProcessing(true) != kResultOk)
-return false;*/
+	if (processor->setProcessing(true) != kResultOk)
+		return false;
 
 	isProcessing = true;
 	return isProcessing;

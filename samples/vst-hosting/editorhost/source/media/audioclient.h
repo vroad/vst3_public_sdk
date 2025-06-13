@@ -101,6 +101,7 @@ private:
 	void initProcessData ();
 	void initProcessContext ();
 	bool updateProcessSetup ();
+	bool setStereoBusArrangement (IAudioProcessor *processor);
 	void preprocess (Buffers& buffers, int64_t continousFrames);
 	void postprocess (Buffers& buffers);
 	bool isPortInRange (int32 port, int32 channel) const;

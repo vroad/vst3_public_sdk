@@ -38,6 +38,7 @@
 #include "public.sdk/samples/vst-hosting/audiohost/source/media/imediaserver.h"
 
 #include <cassert>
+#include <math.h>
 
 //! Workaround for Jack on Windows
 #if defined(SMTG_OS_WINDOWS) && defined(_STDINT)
@@ -52,6 +53,16 @@ namespace Steinberg {
 namespace Vst {
 
 static const int kJackSuccess = 0;
+
+#define TABLE_SIZE   (200)
+typedef struct
+{
+	float sine[TABLE_SIZE];
+	int left_phase;
+	int right_phase;
+}
+paTestData;
+
 //------------------------------------------------------------------------
 //  jack Client
 //------------------------------------------------------------------------
@@ -62,7 +73,7 @@ public:
 	using JackPorts = std::vector<jack_port_t*>;
 	using JackName = std::string;
 
-	JackClient () = default;
+	JackClient ();
 	~JackClient () override;
 
 	// IMediaServer interface
@@ -100,9 +111,12 @@ private:
 	BufferPointers audioOutputPointers;
 	BufferPointers audioInputPointers;
 	IAudioClient::Buffers buffers {nullptr};
+
+	paTestData data;
 };
 
 //------------------------------------------------------------------------
+
 int jack_on_process (jack_nframes_t nframes, void* arg)
 {
 	auto client = reinterpret_cast<JackClient*> (arg);
@@ -131,6 +145,15 @@ IMediaServerPtr createMediaServer (const AudioClientName& name)
 	auto client = std::make_shared<JackClient> ();
 	client->initialize (name);
 	return client;
+}
+
+//-----
+JackClient::JackClient() {
+	for( int i=0; i<TABLE_SIZE; i++ )
+	{
+		data.sine[i] = 0.2 * (float) sin( ((double)i/(double)TABLE_SIZE) * M_PI * 2. );
+	}
+	data.left_phase = data.right_phase = 110;
 }
 
 //------------------------------------------------------------------------
@@ -224,19 +247,46 @@ void JackClient::updateAudioBuffers (jack_nframes_t nframes)
 //------------------------------------------------------------------------
 int JackClient::process (jack_nframes_t nframes)
 {
-	processMidi (nframes);
 	buffers.numSamples = nframes;
 
 	updateAudioBuffers (nframes);
 	if (!audioClient)
 		return 0;
 
-	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false)
+	auto out1 = buffers.outputs[0];
+	auto out2 = buffers.outputs[1];
+	auto in1 = buffers.inputs[0];
+	auto in2 = buffers.inputs[1];
+
+	for( int i=0; i<nframes; i++ )
 	{
+		out1[i] = in1[i] = data.sine[data.left_phase];  /* left */
+		out2[i] = in2[i] = data.sine[data.right_phase];  /* right */
+		data.left_phase += 1;
+		if( data.left_phase >= TABLE_SIZE ) data.left_phase -= TABLE_SIZE;
+		data.right_phase += 3; /* higher pitch so we can distinguish left and right. */
+		if( data.right_phase >= TABLE_SIZE ) data.right_phase -= TABLE_SIZE;
+	}
+
+	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
 		assert (false);
 	}
 
-	return kJackSuccess;
+	return 0;
+
+	// processMidi (nframes);
+	// buffers.numSamples = nframes;
+
+	// updateAudioBuffers (nframes);
+	// if (!audioClient)
+	// 	return 0;
+
+	// if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false)
+	// {
+	// 	assert (false);
+	// }
+
+	// return kJackSuccess;
 }
 
 //------------------------------------------------------------------------
@@ -290,7 +340,7 @@ bool JackClient::addAudioInputPort (JackClient::JackName name)
 		return false;
 
 	audioInputPorts.push_back (port);
-	audioInputPointers.resize (audioOutputPorts.size ());
+	audioInputPointers.resize (audioInputPorts.size ());
 	return true;
 }
 

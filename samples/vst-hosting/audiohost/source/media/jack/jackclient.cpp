@@ -260,17 +260,17 @@ int JackClient::process (jack_nframes_t nframes)
 
 	for( int i=0; i<nframes; i++ )
 	{
-		in1[i] = data.sine[data.left_phase];  /* left */
-		in2[i] = data.sine[data.right_phase];  /* right */
+		out1[i] = data.sine[data.left_phase];  /* left */
+		out2[i] = data.sine[data.right_phase];  /* right */
 		data.left_phase += 1;
 		if( data.left_phase >= TABLE_SIZE ) data.left_phase -= TABLE_SIZE;
 		data.right_phase += 3; /* higher pitch so we can distinguish left and right. */
 		if( data.right_phase >= TABLE_SIZE ) data.right_phase -= TABLE_SIZE;
 	}
 
-	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
-		assert (false);
-	}
+	// if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
+	// 	assert (false);
+	// }
 
 	return 0;
 
