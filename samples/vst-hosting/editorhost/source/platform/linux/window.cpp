@@ -460,16 +460,7 @@ bool X11Window::Impl::handleMainWindowEvent (const XEvent& event)
 		}
 		break;
 
-		case UnmapNotify:
-		{
-			if (event.xunmap.window == xWindow)
-			{
-				controller->onClose (*x11Window);
-				onClose ();
-				res = true;
-			}
-			break;
-		}
+		case UnmapNotify: break;
 		case DestroyNotify: break;
 
 		case ClientMessage:
