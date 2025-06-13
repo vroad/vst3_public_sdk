@@ -111,8 +111,6 @@ private:
 	BufferPointers audioOutputPointers;
 	BufferPointers audioInputPointers;
 	IAudioClient::Buffers buffers {nullptr};
-
-	paTestData data;
 };
 
 //------------------------------------------------------------------------
@@ -149,11 +147,6 @@ IMediaServerPtr createMediaServer (const AudioClientName& name)
 
 //-----
 JackClient::JackClient() {
-	for( int i=0; i<TABLE_SIZE; i++ )
-	{
-		data.sine[i] = 0.2 * (float) sin( ((double)i/(double)TABLE_SIZE) * M_PI * 2. );
-	}
-	data.left_phase = data.right_phase = 110;
 }
 
 //------------------------------------------------------------------------
@@ -257,16 +250,6 @@ int JackClient::process (jack_nframes_t nframes)
 	auto out2 = buffers.outputs[1];
 	auto in1 = buffers.inputs[0];
 	auto in2 = buffers.inputs[1];
-
-	for( int i=0; i<nframes; i++ )
-	{
-		out1[i] = in1[i] = data.sine[data.left_phase];  /* left */
-		out2[i] = in2[i] = data.sine[data.right_phase];  /* right */
-		data.left_phase += 1;
-		if( data.left_phase >= TABLE_SIZE ) data.left_phase -= TABLE_SIZE;
-		data.right_phase += 3; /* higher pitch so we can distinguish left and right. */
-		if( data.right_phase >= TABLE_SIZE ) data.right_phase -= TABLE_SIZE;
-	}
 
 	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
 		assert (false);
