@@ -38,6 +38,8 @@
 #include "audioclient.h"
 
 #include "miditovst.h"
+#include "pluginterfaces/base/ftypes.h"
+#include "pluginterfaces/base/funknown.h"
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/vstspeaker.h"
 #include "pluginterfaces/vst/vsttypes.h"
@@ -190,6 +192,12 @@ bool AudioClient::initialize (const Name& name, IComponent* _component, IMidiMap
 
 	if (midiMapping)
 		midiCCMapping = initMidiCtrlerAssignment (component, midiMapping);
+
+	FUnknownPtr<IAudioProcessor> processor = component;
+	SpeakerArrangement inArr = SpeakerArr::k31Cine;
+	SpeakerArrangement outArr = SpeakerArr::k31Cine;
+	int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
+	printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
 
 	createLocalMediaServer (name);
 	return true;
@@ -364,6 +372,21 @@ bool AudioClient::updateProcessSetup ()
 	}
 
 	ProcessSetup setup {kRealtime, kSample32, blockSize, sampleRate};
+
+	int busCount = component->getBusCount(kAudio, kInput);
+
+	for (int i = 0; i < busCount; i++) {
+		BusInfo bus;
+		if (component->getBusInfo(kAudio, kInput, i, bus)) {
+			continue;
+		}
+		printf("busIndex: %d, name: %s\n", i, (const char*)bus.name);
+	}
+
+	SpeakerArrangement arr;
+	if (processor->getBusArrangement(kInput, 0, arr)) {
+		return false;
+	}
 
 	if (processor->setupProcessing (setup) != kResultOk)
 		return false;

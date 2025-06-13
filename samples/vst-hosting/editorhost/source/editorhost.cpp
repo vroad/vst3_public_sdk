@@ -215,6 +215,13 @@ void App::openEditor (const std::string& path, VST3::Optional<VST3::UID> effectI
 		editController->setComponentHandler (&gComponentHandler);
 	}
 
+	IComponent *component = plugProvider->getComponent ();
+	FUnknownPtr<IAudioProcessor> processor = component;
+	SpeakerArrangement inArr = SpeakerArr::k31Cine;
+	SpeakerArrangement outArr = SpeakerArr::k31Cine;
+	int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
+	printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
+
 	SMTG_DBPRT1 ("Open Editor for %s...\n", path.c_str ());
 	createViewAndShow (editController);
 
@@ -313,12 +320,12 @@ options:
 		IPlatform::instance ().kill (0, helpText);
 	}
 
-        PluginContextFactory::instance ().setPluginContext (&pluginContext);
+	PluginContextFactory::instance ().setPluginContext (&pluginContext);
 
-        openEditor (cmdArgs.back (), std::move (uid), flags);
+	openEditor (cmdArgs.back (), std::move (uid), flags);
 
-        if (jackAudio)
-                startAudioClient ();
+	if (jackAudio)
+		startAudioClient ();
 }
 
 //------------------------------------------------------------------------

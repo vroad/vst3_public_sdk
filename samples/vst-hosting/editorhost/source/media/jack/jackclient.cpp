@@ -246,11 +246,6 @@ int JackClient::process (jack_nframes_t nframes)
 	if (!audioClient)
 		return 0;
 
-	auto out1 = buffers.outputs[0];
-	auto out2 = buffers.outputs[1];
-	auto in1 = buffers.inputs[0];
-	auto in2 = buffers.inputs[1];
-
 	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
 		assert (false);
 	}
