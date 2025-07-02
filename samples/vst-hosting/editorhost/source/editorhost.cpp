@@ -36,7 +36,9 @@
 //-----------------------------------------------------------------------------
 
 #include "public.sdk/samples/vst-hosting/editorhost/source/editorhost.h"
+#include "pluginterfaces/base/ibstream.h"
 #include "public.sdk/samples/vst-hosting/editorhost/source/platform/appinit.h"
+#include "public.sdk/source/vst/vstpresetfile.h"
 #include "base/source/fcommandline.h"
 #include "base/source/fdebug.h"
 #include "pluginterfaces/base/funknown.h"
@@ -222,6 +224,15 @@ void App::openEditor (const std::string& path, VST3::Optional<VST3::UID> effectI
 	int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
 	printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
 
+	if (OPtr<IBStream> stream = FileStream::open ("pluginstate.vstpreset", "r"))
+	{
+		FUID uid;
+		if (plugProvider->getComponentUID (uid) == kResultTrue)
+		{
+			PresetFile::loadPreset (stream, uid, component, editController);
+		}
+	}
+
 	SMTG_DBPRT1 ("Open Editor for %s...\n", path.c_str ());
 	createViewAndShow (editController);
 
@@ -335,6 +346,21 @@ void App::terminate ()
 	if (windowController)
 		windowController->closePlugView ();
 	windowController.reset ();
+
+	if (plugProvider)
+	{
+		if (OPtr<IBStream> stream = FileStream::open ("pluginstate.vstpreset", "w"))
+		{
+			FUID uid;
+			if (plugProvider->getComponentUID (uid) == kResultTrue)
+			{
+				IComponent* component = plugProvider->getComponent ();
+				IEditController* controller = plugProvider->getController ();
+				PresetFile::savePreset (stream, uid, component, controller);
+			}
+		}
+	}
+
 	plugProvider.reset ();
 	module.reset ();
 	PluginContextFactory::instance ().setPluginContext (nullptr);
