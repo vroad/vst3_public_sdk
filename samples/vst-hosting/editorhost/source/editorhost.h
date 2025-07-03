@@ -44,6 +44,8 @@
 #include "public.sdk/source/vst/hosting/plugprovider.h"
 #include "public.sdk/source/vst/utility/optional.h"
 #include "public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.h"
+#include <optional>
+#include <string>
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -51,6 +53,13 @@ namespace Vst {
 namespace EditorHost {
 
 class WindowController;
+
+struct PluginConfig
+{
+    std::string plugin_path;
+    std::optional<std::string> uid;
+	std::optional<std::string> plugin_state_path;
+};
 
 //------------------------------------------------------------------------
 class App : public IApplication
@@ -66,7 +75,7 @@ private:
 		kSetComponentHandler = 1 << 0,
 		kSecondWindow = 1 << 1,
 	};
-	void openEditor (const std::string& path, VST3::Optional<VST3::UID> effectID, uint32 flags);
+	void openEditor (const PluginConfig& cfg, uint32 flags);
         void createViewAndShow (IEditController* controller);
         void startAudioClient ();
 
@@ -76,6 +85,7 @@ private:
         WindowPtr window;
         std::shared_ptr<WindowController> windowController;
         AudioClientPtr audioClient;
+	std::string pluginStatePath;
 };
 
 //------------------------------------------------------------------------
