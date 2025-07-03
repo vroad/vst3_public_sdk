@@ -2,8 +2,8 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : AudioHost
-// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/miditovst.h
+// Category    : EditorHost
+// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/miditovst.h
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3
 //

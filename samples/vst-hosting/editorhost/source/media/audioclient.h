@@ -2,8 +2,8 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : AudioHost
-// Filename    : public.sdk/samples/vst-hosting/audiohost/source/audioclient.h
+// Category    : EditorHost
+// Filename    : public.sdk/samples/vst-hosting/editorhost/source/audioclient.h
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3
 //
@@ -37,8 +37,8 @@
 
 #pragma once
 
-#include "public.sdk/samples/vst-hosting/audiohost/source/media/imediaserver.h"
-#include "public.sdk/samples/vst-hosting/audiohost/source/media/iparameterclient.h"
+#include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
+#include "public.sdk/samples/vst-hosting/editorhost/source/media/iparameterclient.h"
 #include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/hosting/processdata.h"
@@ -52,6 +52,7 @@ namespace Vst {
 //------------------------------------------------------------------------
 class IMidiMapping;
 class IComponent;
+struct JackServerOptions;
 
 enum
 {
@@ -76,7 +77,8 @@ public:
 	~AudioClient () override;
 
 	static AudioClientPtr create (const Name& name, IComponent* component,
-	                              IMidiMapping* midiMapping);
+									IMidiMapping* midiMapping,
+									const JackServerOptions& options);
 
 	// IAudioClient
 	bool process (Buffers& buffers, int64_t continousFrames) override;
@@ -91,11 +93,12 @@ public:
 	// IParameterClient
 	void setParameter (ParamID id, ParamValue value, int32 sampleOffset) override;
 
-	bool initialize (const Name& name, IComponent* component, IMidiMapping* midiMapping);
+	bool initialize (const Name& name, IComponent* component, IMidiMapping* midiMapping,
+					const JackServerOptions& options);
 
 //--------------------------------------------------------------------
 private:
-	void createLocalMediaServer (const Name& name);
+	void createLocalMediaServer (const Name& name, const JackServerOptions& options);
 	void terminate ();
 	void updateBusBuffers (Buffers& buffers, HostProcessData& processData);
 	void initProcessData ();

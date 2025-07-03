@@ -46,6 +46,7 @@
 #include "public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.h"
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -56,9 +57,11 @@ class WindowController;
 
 struct PluginConfig
 {
-    std::string plugin_path;
-    std::optional<std::string> uid;
+	std::string plugin_path;
+	std::optional<std::string> uid;
 	std::optional<std::string> plugin_state_path;
+	std::optional<bool> jack_auto_connect_audio;
+	std::optional<std::unordered_map<std::string, std::string>> jack_output_ports;
 };
 
 //------------------------------------------------------------------------
@@ -81,11 +84,12 @@ private:
 
 	VST3::Hosting::Module::Ptr module {nullptr};
 	IPtr<PlugProvider> plugProvider {nullptr};
-        Vst::HostApplication pluginContext;
-        WindowPtr window;
-        std::shared_ptr<WindowController> windowController;
-        AudioClientPtr audioClient;
+	Vst::HostApplication pluginContext;
+	WindowPtr window;
+	std::shared_ptr<WindowController> windowController;
+	AudioClientPtr audioClient;
 	std::string pluginStatePath;
+	PluginConfig pluginConfig;
 };
 
 //------------------------------------------------------------------------

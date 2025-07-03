@@ -37,6 +37,7 @@
 
 #include "public.sdk/samples/vst-hosting/editorhost/source/editorhost.h"
 #include "pluginterfaces/base/ibstream.h"
+#include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
 #include "public.sdk/samples/vst-hosting/editorhost/source/platform/appinit.h"
 #include "public.sdk/source/vst/vstpresetfile.h"
 #include "public.sdk/source/toml11/toml.hpp"
@@ -53,9 +54,11 @@
 
 //------------------------------------------------------------------------
 TOML11_DEFINE_CONVERSION_NON_INTRUSIVE(::Steinberg::Vst::EditorHost::PluginConfig,
-	plugin_path,
-	uid,
-	plugin_state_path);
+        plugin_path,
+        uid,
+        plugin_state_path,
+        jack_auto_connect_audio,
+        jack_output_ports);
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -296,7 +299,13 @@ void App::startAudioClient ()
 	OPtr<IEditController> controller = plugProvider->getController ();
 	auto midiMapping = U::cast<IMidiMapping> (controller);
 
-	audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping);
+	JackServerOptions options;
+	if (pluginConfig.jack_auto_connect_audio)
+		options.autoConnectAudio = *pluginConfig.jack_auto_connect_audio;
+	if (pluginConfig.jack_output_ports)
+		options.outputPorts = *pluginConfig.jack_output_ports;
+
+	audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping, options);
 }
 
 //------------------------------------------------------------------------
@@ -339,10 +348,11 @@ options:
 	PluginContextFactory::instance ().setPluginContext (&pluginContext);
 
 	auto configPath = cmdArgs.back ();
-	auto config = toml::parse (configPath);
-	PluginConfig cfg = toml::get<PluginConfig> (config);
+        auto config = toml::parse (configPath);
+        PluginConfig cfg = toml::get<PluginConfig> (config);
+        pluginConfig = cfg;
 
-	openEditor (cfg, flags);
+        openEditor (cfg, flags);
 
 	if (jackAudio)
 		startAudioClient ();

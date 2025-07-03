@@ -2,8 +2,8 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : AudioHost
-// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/audioclient.cpp
+// Category    : EditorHost
+// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.cpp
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3
 //
@@ -43,6 +43,7 @@
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/vstspeaker.h"
 #include "pluginterfaces/vst/vsttypes.h"
+#include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
 #include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
@@ -157,10 +158,11 @@ AudioClient::~AudioClient ()
 
 //------------------------------------------------------------------------
 AudioClientPtr AudioClient::create (const Name& name, IComponent* component,
-                                    IMidiMapping* midiMapping)
+									IMidiMapping* midiMapping,
+									const JackServerOptions& options)
 {
 	auto newProcessor = std::make_shared<AudioClient> ();
-	newProcessor->initialize (name, component, midiMapping);
+	newProcessor->initialize (name, component, midiMapping, options);
 	return newProcessor;
 }
 
@@ -172,15 +174,16 @@ void AudioClient::initProcessContext ()
 }
 
 //------------------------------------------------------------------------
-void AudioClient::createLocalMediaServer (const Name& name)
+void AudioClient::createLocalMediaServer (const Name& name, const JackServerOptions& options)
 {
-	mediaServer = createMediaServer (name);
+	mediaServer = createJackMediaServer (name, options);
 	mediaServer->registerAudioClient (this);
 	mediaServer->registerMidiClient (this);
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::initialize (const Name& name, IComponent* _component, IMidiMapping* midiMapping)
+bool AudioClient::initialize (const Name& name, IComponent* _component, IMidiMapping* midiMapping,
+								const JackServerOptions& options)
 {
 	component = _component;
 	if (!component)
@@ -199,7 +202,7 @@ bool AudioClient::initialize (const Name& name, IComponent* _component, IMidiMap
 	int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
 	printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
 
-	createLocalMediaServer (name);
+	createLocalMediaServer (name, options);
 	return true;
 }
 

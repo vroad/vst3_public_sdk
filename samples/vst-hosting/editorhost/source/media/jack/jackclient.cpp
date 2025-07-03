@@ -2,8 +2,8 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : AudioHost
-// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/jack/jackclient.cpp
+// Category    : EditorHost
+// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/jack/jackclient.cpp
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3 using Jack
 //
@@ -35,10 +35,13 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "public.sdk/samples/vst-hosting/audiohost/source/media/imediaserver.h"
+#include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
 
 #include <cassert>
+#include <jack/types.h>
 #include <math.h>
+#include <string>
+#include <unordered_map>
 
 //! Workaround for Jack on Windows
 #if defined(SMTG_OS_WINDOWS) && defined(_STDINT)
@@ -80,7 +83,7 @@ public:
 	bool registerAudioClient (IAudioClient* client) override;
 	bool registerMidiClient (IMidiClient* client) override;
 
-	bool initialize (JackName name);
+	bool initialize (JackName name, const JackServerOptions& options);
 
 	// jack process callback
 	int process (jack_nframes_t nframes);
@@ -96,6 +99,7 @@ private:
 	int processMidi (jack_nframes_t nframes);
 	bool setupJackProcessCallbacks (jack_client_t* client);
 	bool autoConnectAudioPorts (jack_client_t* client);
+	bool connectAudioPorts (jack_client_t* client);
 	bool autoConnectMidiPorts (jack_client_t* client);
 	void updateAudioBuffers (jack_nframes_t nframes);
 
@@ -111,7 +115,10 @@ private:
 	BufferPointers audioOutputPointers;
 	BufferPointers audioInputPointers;
 	IAudioClient::Buffers buffers {nullptr};
-};
+	bool autoConnectAudioFlag {true};
+	std::unordered_map<std::string, std::string> manualOutputPorts;
+	std::unordered_map<std::string, jack_port_t*> outputPortNameToPorts;
+}; 
 
 //------------------------------------------------------------------------
 
@@ -138,10 +145,10 @@ int jack_on_set_block_size (jack_nframes_t nframes, void* arg)
 }
 
 //------------------------------------------------------------------------
-IMediaServerPtr createMediaServer (const AudioClientName& name)
+IMediaServerPtr createJackMediaServer (const AudioClientName& name, const JackServerOptions& options)
 {
 	auto client = std::make_shared<JackClient> ();
-	client->initialize (name);
+	client->initialize (name, options);
 	return client;
 }
 
@@ -178,8 +185,16 @@ bool JackClient::registerAudioClient (IAudioClient* client)
 		return false;
 
 	//! AFTER activation, register the ports.
-	if (!autoConnectAudioPorts (jackClient))
-		return false;
+	if (autoConnectAudioFlag)
+	{
+		if (!autoConnectAudioPorts (jackClient))
+			return false;
+	}
+	else if (!manualOutputPorts.empty ())
+	{
+		if (!connectAudioPorts (jackClient))
+			return false;
+	}
 
 	return true;
 }
@@ -204,11 +219,14 @@ bool JackClient::registerMidiClient (IMidiClient* client)
 }
 
 //------------------------------------------------------------------------
-bool JackClient::initialize (JackClient::JackName name)
+bool JackClient::initialize (JackClient::JackName name, const JackServerOptions& options)
 {
 	jackClient = registerClient (name);
 	if (!jackClient)
 		return false;
+
+	autoConnectAudioFlag = options.autoConnectAudio;
+	manualOutputPorts = options.outputPorts;
 
 	return true;
 }
@@ -306,6 +324,7 @@ bool JackClient::addAudioOutputPort (JackClient::JackName name)
 
 	audioOutputPorts.push_back (port);
 	audioOutputPointers.resize (audioOutputPorts.size ());
+	outputPortNameToPorts[name] = port;
 	return true;
 }
 
@@ -420,6 +439,31 @@ bool JackClient::autoConnectAudioPorts (jack_client_t* client)
 	}
 
 	jack_free (ports);
+	return true;
+}
+
+//------------------------------------------------------------------------
+bool JackClient::connectAudioPorts (jack_client_t* client)
+{
+	int portIndex = 0;
+
+	for (auto& manualPortIt : manualOutputPorts)
+	{
+		auto& partialSrcPortName = manualPortIt.first;
+		auto& dstPortName = manualPortIt.second;
+		auto portIt = outputPortNameToPorts.find(partialSrcPortName);
+
+		if (portIt == outputPortNameToPorts.end())
+			continue;
+
+		auto port = portIt->second;
+
+		printf("connecting: %s %s\n", jack_port_name(port), dstPortName.c_str());
+		auto res = jack_connect (client, jack_port_name (port), dstPortName.c_str ());
+		if (res != 0)
+			break;
+	}
+
 	return true;
 }
 

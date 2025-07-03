@@ -2,8 +2,8 @@
 // Flags       : clang-format auto
 // Project     : VST SDK
 //
-// Category    : AudioHost
-// Filename    : public.sdk/samples/vst-hosting/audiohost/source/media/imediaserver.h
+// Category    : EditorHost
+// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3
 //
@@ -39,6 +39,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <pluginterfaces/vst/vsttypes.h>
 
@@ -103,8 +104,8 @@ struct IMidiClient
 //----------------------------------------------------------------------------------
 struct IMediaServer
 {
-	virtual bool registerAudioClient (IAudioClient* client) = 0;
-	virtual bool registerMidiClient (IMidiClient* client) = 0;
+        virtual bool registerAudioClient (IAudioClient* client) = 0;
+        virtual bool registerMidiClient (IMidiClient* client) = 0;
 
 	virtual ~IMediaServer () {}
 };
@@ -112,7 +113,14 @@ struct IMediaServer
 //----------------------------------------------------------------------------------
 using IMediaServerPtr = std::shared_ptr<IMediaServer>;
 
-IMediaServerPtr createMediaServer (const AudioClientName& name);
+struct JackServerOptions
+{
+	bool autoConnectAudio {true};
+	std::unordered_map<std::string, std::string> outputPorts;
+};
+
+IMediaServerPtr createJackMediaServer (const AudioClientName& name, const JackServerOptions& options);
+
 //----------------------------------------------------------------------------------
 } // Vst
 } // Steinberg
