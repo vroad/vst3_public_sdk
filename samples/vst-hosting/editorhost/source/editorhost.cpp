@@ -305,7 +305,7 @@ void App::startAudioClient ()
 	if (pluginConfig.jack_output_ports)
 		options.outputPorts = *pluginConfig.jack_output_ports;
 
-	audioClient = AudioClient::create ("VST 3 SDK", component, midiMapping, options);
+	audioClient = AudioClient::create ("MinVSTHost Core", component, midiMapping, options);
 }
 
 //------------------------------------------------------------------------
