@@ -4,7 +4,8 @@
 // Project     : Steinberg Plug-In SDK
 // Filename    : public.sdk/source/common/systemclipboard_linux.cpp
 // Created by  : Steinberg 04.2023
-// Description : Simple helper allowing to copy/retrieve text to/from the system clipboard
+// Description : Simple helper allowing to copy/retrieve text to/from the system
+// clipboard
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -21,18 +22,18 @@
 //
 // THIS SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR
+// ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "systemclipboard.h"
 #include "pluginterfaces/base/fplatform.h"
+#include "systemclipboard.h"
 
 #if SMTG_OS_LINUX
 
@@ -41,17 +42,15 @@ namespace Steinberg {
 namespace SystemClipboard {
 
 //-----------------------------------------------------------------------------
-bool copyTextToClipboard (const std::string& text)
-{
-	// TODO
-	return false;
+bool copyTextToClipboard(const std::string &text) {
+  // TODO
+  return false;
 }
 
 //-----------------------------------------------------------------------------
-bool getTextFromClipboard (std::string& text)
-{
-	// TODO
-	return false;
+bool getTextFromClipboard(std::string &text) {
+  // TODO
+  return false;
 }
 
 //------------------------------------------------------------------------

@@ -10,8 +10,8 @@
 // LICENSE
 // (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
 //   * Redistributions of source code must retain the above copyright notice,
 //     this list of conditions and the following disclaimer.
@@ -22,16 +22,17 @@
 //     contributors may be used to endorse or promote products derived from this
 //     software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #pragma once
@@ -47,19 +48,19 @@ namespace StringConvert {
 /**
  *	Forward to Steinberg::StringConvert::convert (...)
  */
-std::u16string convert (const std::string& utf8Str);
+std::u16string convert(const std::string &utf8Str);
 
 //------------------------------------------------------------------------
 /**
  *	Forward to Steinberg::StringConvert::convert (...)
  */
-std::string convert (const std::u16string& str);
+std::string convert(const std::u16string &str);
 
 //------------------------------------------------------------------------
 /**
  *  Forward to Steinberg::StringConvert::convert (...)
  */
-std::string convert (const char* str, uint32_t max);
+std::string convert(const char *str, uint32_t max);
 
 //------------------------------------------------------------------------
 /**
@@ -70,7 +71,7 @@ std::string convert (const char* str, uint32_t max);
  *
  *  @return true on success
  */
-bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str);
+bool convert(const std::string &utf8Str, Steinberg::Vst::String128 str);
 
 //------------------------------------------------------------------------
 /**
@@ -82,8 +83,8 @@ bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str);
  *
  *  @return true on success
  */
-bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str,
-                     uint32_t maxCharacters);
+bool convert(const std::string &utf8Str, Steinberg::Vst::TChar *str,
+             uint32_t maxCharacters);
 
 //------------------------------------------------------------------------
 /**
@@ -93,7 +94,7 @@ bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str,
  *
  *  @return UTF-8 string
  */
-std::string convert (const Steinberg::Vst::TChar* str);
+std::string convert(const Steinberg::Vst::TChar *str);
 
 //------------------------------------------------------------------------
 /**
@@ -104,15 +105,14 @@ std::string convert (const Steinberg::Vst::TChar* str);
  *
  *  @return UTF-8 string
  */
-std::string convert (const Steinberg::Vst::TChar* str, uint32_t max);
+std::string convert(const Steinberg::Vst::TChar *str, uint32_t max);
 
 //------------------------------------------------------------------------
-} // StringConvert
+} // namespace StringConvert
 
 //------------------------------------------------------------------------
-inline const Steinberg::Vst::TChar* toTChar (const std::u16string& str)
-{
-	return reinterpret_cast<const Steinberg::Vst::TChar*> (str.data ());
+inline const Steinberg::Vst::TChar *toTChar(const std::u16string &str) {
+  return reinterpret_cast<const Steinberg::Vst::TChar *>(str.data());
 }
 
 //------------------------------------------------------------------------
@@ -123,16 +123,14 @@ inline const Steinberg::Vst::TChar* toTChar (const std::u16string& str)
  *
  *	@return UTF-16 string
  */
-template <typename NumberT>
-std::u16string toString (NumberT value)
-{
-	auto u8str = std::to_string (value);
-	return StringConvert::convert (u8str);
+template <typename NumberT> std::u16string toString(NumberT value) {
+  auto u8str = std::to_string(value);
+  return StringConvert::convert(u8str);
 }
 
 //------------------------------------------------------------------------
-} // Vst
-} // Steinberg
+} // namespace Vst
+} // namespace Steinberg
 
 //------------------------------------------------------------------------
 // Deprecated VST3 namespace
@@ -141,71 +139,63 @@ namespace VST3 {
 namespace StringConvert {
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline std::u16string convert (const std::string& utf8Str)
-{
-	return Steinberg::Vst::StringConvert::convert (utf8Str);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline std::u16string convert(const std::string &utf8Str) {
+  return Steinberg::Vst::StringConvert::convert(utf8Str);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline std::string convert (const std::u16string& str)
-{
-	return Steinberg::Vst::StringConvert::convert (str);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline std::string convert(const std::u16string &str) {
+  return Steinberg::Vst::StringConvert::convert(str);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline std::string convert (const char* str, uint32_t max)
-{
-	return Steinberg::Vst::StringConvert::convert (str, max);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline std::string convert(const char *str, uint32_t max) {
+  return Steinberg::Vst::StringConvert::convert(str, max);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str)
-{
-	return Steinberg::Vst::StringConvert::convert (utf8Str, str);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline bool convert(const std::string &utf8Str, Steinberg::Vst::String128 str) {
+  return Steinberg::Vst::StringConvert::convert(utf8Str, str);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str, uint32_t maxCharacters)
-{
-	return Steinberg::Vst::StringConvert::convert (utf8Str, str, maxCharacters);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline bool convert(const std::string &utf8Str, Steinberg::Vst::TChar *str,
+                    uint32_t maxCharacters) {
+  return Steinberg::Vst::StringConvert::convert(utf8Str, str, maxCharacters);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline std::string convert (const Steinberg::Vst::TChar* str)
-{
-	return Steinberg::Vst::StringConvert::convert (str);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline std::string convert(const Steinberg::Vst::TChar *str) {
+  return Steinberg::Vst::StringConvert::convert(str);
 }
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::StringConvert::convert (...)")
-inline std::string convert (const Steinberg::Vst::TChar* str, uint32_t max)
-{
-	return Steinberg::Vst::StringConvert::convert (str, max);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::StringConvert::convert (...)")
+inline std::string convert(const Steinberg::Vst::TChar *str, uint32_t max) {
+  return Steinberg::Vst::StringConvert::convert(str, max);
 }
 
 //------------------------------------------------------------------------
-} // StringConvert
+} // namespace StringConvert
 
 //------------------------------------------------------------------------
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::toTChar (...)")
-inline const Steinberg::Vst::TChar* toTChar (const std::u16string& str)
-{
-	return Steinberg::Vst::toTChar (str);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::toTChar (...)")
+inline const Steinberg::Vst::TChar *toTChar(const std::u16string &str) {
+  return Steinberg::Vst::toTChar(str);
 }
 
 //------------------------------------------------------------------------
 template <typename NumberT>
-SMTG_DEPRECATED_MSG ("Use Steinberg::Vst::toString (...)")
-std::u16string toString (NumberT value)
-{
-	return Steinberg::Vst::toString (value);
+SMTG_DEPRECATED_MSG("Use Steinberg::Vst::toString (...)")
+std::u16string toString(NumberT value) {
+  return Steinberg::Vst::toString(value);
 }
 
 //------------------------------------------------------------------------
-} // VST3
+} // namespace VST3

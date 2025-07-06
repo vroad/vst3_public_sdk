@@ -3,16 +3,16 @@
 // Project     : VST SDK
 //
 // Category    : Validator
-// Filename    : public.sdk/source/vst/testsuite/processing/variableblocksize.cpp
-// Created by  : Steinberg, 04/2005
-// Description : VST Test Suite
+// Filename    :
+// public.sdk/source/vst/testsuite/processing/variableblocksize.cpp Created by
+// : Steinberg, 04/2005 Description : VST Test Suite
 //
 //-----------------------------------------------------------------------------
 // LICENSE
 // (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
 //   * Redistributions of source code must retain the above copyright notice,
 //     this list of conditions and the following disclaimer.
@@ -23,16 +23,17 @@
 //     contributors may be used to endorse or promote products derived from this
 //     software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #include "public.sdk/source/vst/testsuite/processing/variableblocksize.h"
@@ -44,59 +45,55 @@ namespace Vst {
 //------------------------------------------------------------------------
 // VariableBlockSizeTest
 //------------------------------------------------------------------------
-VariableBlockSizeTest::VariableBlockSizeTest (ITestPlugProvider* plugProvider,
-                                              ProcessSampleSize sampl)
-: ProcessTest (plugProvider, sampl)
-{
-}
+VariableBlockSizeTest::VariableBlockSizeTest(ITestPlugProvider *plugProvider,
+                                             ProcessSampleSize sampl)
+    : ProcessTest(plugProvider, sampl) {}
 
 //------------------------------------------------------------------------
-bool PLUGIN_API VariableBlockSizeTest::run (ITestResult* testResult)
-{
-	if (!vstPlug || !testResult || !audioEffect)
-		return false;
+bool PLUGIN_API VariableBlockSizeTest::run(ITestResult *testResult) {
+  if (!vstPlug || !testResult || !audioEffect)
+    return false;
 
-	if (!canProcessSampleSize (testResult))
-		return true;
+  if (!canProcessSampleSize(testResult))
+    return true;
 
-	printTestHeader (testResult);
+  printTestHeader(testResult);
 
-	audioEffect->setProcessing (true);
+  audioEffect->setProcessing(true);
 
-	for (int32 i = 0; i <= TestDefaults::instance ().numIterations; ++i)
-	{
-		int32 sampleFrames = rand () % processSetup.maxSamplesPerBlock;
-		processData.numSamples = sampleFrames;
-		if (i == 0)
-			processData.numSamples = 0;
+  for (int32 i = 0; i <= TestDefaults::instance().numIterations; ++i) {
+    int32 sampleFrames = rand() % processSetup.maxSamplesPerBlock;
+    processData.numSamples = sampleFrames;
+    if (i == 0)
+      processData.numSamples = 0;
 #if defined(TOUGHTESTS) && TOUGHTESTS
-		else if (i == 1)
-			processData.numSamples = -50000;
-		else if (i == 2)
-			processData.numSamples = processSetup.maxSamplesPerBlock * 2;
+    else if (i == 1)
+      processData.numSamples = -50000;
+    else if (i == 2)
+      processData.numSamples = processSetup.maxSamplesPerBlock * 2;
 #endif // TOUGHTESTS
 
-		tresult result = audioEffect->process (processData);
-		if ((result != kResultOk)
+    tresult result = audioEffect->process(processData);
+    if ((result != kResultOk)
 #if defined(TOUGHTESTS) && TOUGHTESTS
-		    && (i > 1)
+        && (i > 1)
 #else
-		    && (i > 0)
+        && (i > 0)
 #endif // TOUGHTESTS
-		        )
-		{
-			addErrorMessage (
-			    testResult,
-			    printf ("The component failed to process an audioblock of size %i", sampleFrames));
-			audioEffect->setProcessing (false);
-			return false;
-		}
-	}
+    ) {
+      addErrorMessage(
+          testResult,
+          printf("The component failed to process an audioblock of size %i",
+                 sampleFrames));
+      audioEffect->setProcessing(false);
+      return false;
+    }
+  }
 
-	audioEffect->setProcessing (false);
-	return true;
+  audioEffect->setProcessing(false);
+  return true;
 }
 
 //------------------------------------------------------------------------
-} // Vst
-} // Steinberg
+} // namespace Vst
+} // namespace Steinberg
