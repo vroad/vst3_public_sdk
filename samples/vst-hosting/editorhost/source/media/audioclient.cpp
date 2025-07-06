@@ -3,7 +3,8 @@
 // Project     : VST SDK
 //
 // Category    : EditorHost
-// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.cpp
+// Filename    :
+// public.sdk/samples/vst-hosting/editorhost/source/media/audioclient.cpp
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3
 //
@@ -11,8 +12,8 @@
 // LICENSE
 // (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
 //   * Redistributions of source code must retain the above copyright notice,
 //     this list of conditions and the following disclaimer.
@@ -23,16 +24,17 @@
 //     contributors may be used to endorse or promote products derived from this
 //     software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #include "audioclient.h"
@@ -41,14 +43,14 @@
 #include "pluginterfaces/base/ftypes.h"
 #include "pluginterfaces/base/funknown.h"
 #include "pluginterfaces/vst/ivstcomponent.h"
+#include "pluginterfaces/vst/ivsteditcontroller.h"
+#include "pluginterfaces/vst/ivstmidicontrollers.h"
 #include "pluginterfaces/vst/vstspeaker.h"
 #include "pluginterfaces/vst/vsttypes.h"
 #include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
 #include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
-#include "pluginterfaces/vst/ivsteditcontroller.h"
-#include "pluginterfaces/vst/ivstmidicontrollers.h"
 #include <functional>
 
 #include <cassert>
@@ -60,435 +62,398 @@ namespace Vst {
 
 //------------------------------------------------------------------------
 // From Vst2Wrapper
-static MidiCCMapping initMidiCtrlerAssignment (IComponent* component, IMidiMapping* midiMapping)
-{
-	MidiCCMapping midiCCMapping {};
+static MidiCCMapping initMidiCtrlerAssignment(IComponent *component,
+                                              IMidiMapping *midiMapping) {
+  MidiCCMapping midiCCMapping{};
 
-	if (!midiMapping || !component)
-		return midiCCMapping;
+  if (!midiMapping || !component)
+    return midiCCMapping;
 
-	int32 busses = std::min<int32> (component->getBusCount (kEvent, kInput), kMaxMidiMappingBusses);
+  int32 busses = std::min<int32>(component->getBusCount(kEvent, kInput),
+                                 kMaxMidiMappingBusses);
 
-	if (midiCCMapping[0][0].empty ())
-	{
-		for (int32 b = 0; b < busses; b++)
-			for (int32 i = 0; i < kMaxMidiChannels; i++)
-				midiCCMapping[b][i].resize (Vst::kCountCtrlNumber);
-	}
+  if (midiCCMapping[0][0].empty()) {
+    for (int32 b = 0; b < busses; b++)
+      for (int32 i = 0; i < kMaxMidiChannels; i++)
+        midiCCMapping[b][i].resize(Vst::kCountCtrlNumber);
+  }
 
-	ParamID paramID;
-	for (int32 b = 0; b < busses; b++)
-	{
-		for (int16 ch = 0; ch < kMaxMidiChannels; ch++)
-		{
-			for (int32 i = 0; i < Vst::kCountCtrlNumber; i++)
-			{
-				paramID = kNoParamId;
-				if (midiMapping->getMidiControllerAssignment (b, ch, (CtrlNumber)i, paramID) ==
-				    kResultTrue)
-				{
-					// TODO check if tag is associated to a parameter
-					midiCCMapping[b][ch][i] = paramID;
-				}
-				else
-					midiCCMapping[b][ch][i] = kNoParamId;
-			}
-		}
-	}
-	return midiCCMapping;
+  ParamID paramID;
+  for (int32 b = 0; b < busses; b++) {
+    for (int16 ch = 0; ch < kMaxMidiChannels; ch++) {
+      for (int32 i = 0; i < Vst::kCountCtrlNumber; i++) {
+        paramID = kNoParamId;
+        if (midiMapping->getMidiControllerAssignment(b, ch, (CtrlNumber)i,
+                                                     paramID) == kResultTrue) {
+          // TODO check if tag is associated to a parameter
+          midiCCMapping[b][ch][i] = paramID;
+        } else
+          midiCCMapping[b][ch][i] = kNoParamId;
+      }
+    }
+  }
+  return midiCCMapping;
 }
 
 //------------------------------------------------------------------------
-static void assignBusBuffers (const IAudioClient::Buffers& buffers, HostProcessData& processData,
-                              bool unassign = false)
-{
-	// Set outputs
-	auto bufferIndex = 0;
-	for (auto busIndex = 0; busIndex < processData.numOutputs; busIndex++)
-	{
-		auto channelCount = processData.outputs[busIndex].numChannels;
-		for (auto chanIndex = 0; chanIndex < channelCount; chanIndex++)
-		{
-			if (bufferIndex < buffers.numOutputs)
-			{
-				processData.setChannelBuffer (BusDirections::kOutput, busIndex, chanIndex,
-				                              unassign ? nullptr : buffers.outputs[bufferIndex]);
-				bufferIndex++;
-			}
-		}
-	}
+static void assignBusBuffers(const IAudioClient::Buffers &buffers,
+                             HostProcessData &processData,
+                             bool unassign = false) {
+  // Set outputs
+  auto bufferIndex = 0;
+  for (auto busIndex = 0; busIndex < processData.numOutputs; busIndex++) {
+    auto channelCount = processData.outputs[busIndex].numChannels;
+    for (auto chanIndex = 0; chanIndex < channelCount; chanIndex++) {
+      if (bufferIndex < buffers.numOutputs) {
+        processData.setChannelBuffer(
+            BusDirections::kOutput, busIndex, chanIndex,
+            unassign ? nullptr : buffers.outputs[bufferIndex]);
+        bufferIndex++;
+      }
+    }
+  }
 
-	// Set inputs
-	bufferIndex = 0;
-	for (auto busIndex = 0; busIndex < processData.numInputs; busIndex++)
-	{
-		auto channelCount = processData.inputs[busIndex].numChannels;
-		for (auto chanIndex = 0; chanIndex < channelCount; chanIndex++)
-		{
-			if (bufferIndex < buffers.numInputs)
-			{
-				processData.setChannelBuffer (BusDirections::kInput, busIndex, chanIndex,
-				                              unassign ? nullptr : buffers.inputs[bufferIndex]);
+  // Set inputs
+  bufferIndex = 0;
+  for (auto busIndex = 0; busIndex < processData.numInputs; busIndex++) {
+    auto channelCount = processData.inputs[busIndex].numChannels;
+    for (auto chanIndex = 0; chanIndex < channelCount; chanIndex++) {
+      if (bufferIndex < buffers.numInputs) {
+        processData.setChannelBuffer(BusDirections::kInput, busIndex, chanIndex,
+                                     unassign ? nullptr
+                                              : buffers.inputs[bufferIndex]);
 
-				bufferIndex++;
-			}
-		}
-	}
+        bufferIndex++;
+      }
+    }
+  }
 }
 
 //------------------------------------------------------------------------
-static void unassignBusBuffers (const IAudioClient::Buffers& buffers, HostProcessData& processData)
-{
-	assignBusBuffers (buffers, processData, true);
+static void unassignBusBuffers(const IAudioClient::Buffers &buffers,
+                               HostProcessData &processData) {
+  assignBusBuffers(buffers, processData, true);
 }
 
 //------------------------------------------------------------------------
 //  Vst3Processor
 //------------------------------------------------------------------------
-AudioClient::AudioClient ()
-{
+AudioClient::AudioClient() {}
+
+//------------------------------------------------------------------------
+AudioClient::~AudioClient() { terminate(); }
+
+//------------------------------------------------------------------------
+AudioClientPtr AudioClient::create(const Name &name, IComponent *component,
+                                   IMidiMapping *midiMapping,
+                                   const JackServerOptions &options) {
+  auto newProcessor = std::make_shared<AudioClient>();
+  newProcessor->initialize(name, component, midiMapping, options);
+  return newProcessor;
 }
 
 //------------------------------------------------------------------------
-AudioClient::~AudioClient ()
-{
-
-	terminate ();
+void AudioClient::initProcessContext() {
+  processContext = {};
+  processContext.tempo = 120;
 }
 
 //------------------------------------------------------------------------
-AudioClientPtr AudioClient::create (const Name& name, IComponent* component,
-									IMidiMapping* midiMapping,
-									const JackServerOptions& options)
-{
-	auto newProcessor = std::make_shared<AudioClient> ();
-	newProcessor->initialize (name, component, midiMapping, options);
-	return newProcessor;
+void AudioClient::createLocalMediaServer(const Name &name,
+                                         const JackServerOptions &options) {
+  mediaServer = createJackMediaServer(name, options);
+  mediaServer->registerAudioClient(this);
+  mediaServer->registerMidiClient(this);
 }
 
 //------------------------------------------------------------------------
-void AudioClient::initProcessContext ()
-{
-	processContext = {};
-	processContext.tempo = 120;
+bool AudioClient::initialize(const Name &name, IComponent *_component,
+                             IMidiMapping *midiMapping,
+                             const JackServerOptions &options) {
+  component = _component;
+  if (!component)
+    return false;
+
+  initProcessData();
+
+  paramTransferrer.setMaxParameters(1000);
+
+  if (midiMapping)
+    midiCCMapping = initMidiCtrlerAssignment(component, midiMapping);
+
+  FUnknownPtr<IAudioProcessor> processor = component;
+  SpeakerArrangement inArr = SpeakerArr::k31Cine;
+  SpeakerArrangement outArr = SpeakerArr::k31Cine;
+  int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
+  printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
+
+  createLocalMediaServer(name, options);
+  return true;
 }
 
 //------------------------------------------------------------------------
-void AudioClient::createLocalMediaServer (const Name& name, const JackServerOptions& options)
-{
-	mediaServer = createJackMediaServer (name, options);
-	mediaServer->registerAudioClient (this);
-	mediaServer->registerMidiClient (this);
+void AudioClient::terminate() {
+  mediaServer = nullptr;
+
+  FUnknownPtr<IAudioProcessor> processor = component;
+  if (!processor)
+    return;
+
+  processor->setProcessing(false);
+  component->setActive(false);
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::initialize (const Name& name, IComponent* _component, IMidiMapping* midiMapping,
-								const JackServerOptions& options)
-{
-	component = _component;
-	if (!component)
-		return false;
+void AudioClient::initProcessData() {
+  // processData.prepare will be done in setBlockSize
 
-	initProcessData ();
+  processData.inputEvents = &eventList;
+  processData.inputParameterChanges = &inputParameterChanges;
+  processData.processContext = &processContext;
 
-	paramTransferrer.setMaxParameters (1000);
-
-	if (midiMapping)
-		midiCCMapping = initMidiCtrlerAssignment (component, midiMapping);
-
-	FUnknownPtr<IAudioProcessor> processor = component;
-	SpeakerArrangement inArr = SpeakerArr::k31Cine;
-	SpeakerArrangement outArr = SpeakerArr::k31Cine;
-	int busArrResponse = processor->setBusArrangements(&inArr, 1, &outArr, 1);
-	printf("setBusArrangements: %d\n", busArrResponse == kResultOk);
-
-	createLocalMediaServer (name, options);
-	return true;
+  initProcessContext();
 }
 
 //------------------------------------------------------------------------
-void AudioClient::terminate ()
-{
-	mediaServer = nullptr;
+IMidiClient::IOSetup AudioClient::getMidiIOSetup() const {
+  IMidiClient::IOSetup iosetup;
+  auto count =
+      component->getBusCount(MediaTypes::kEvent, BusDirections::kInput);
+  for (int32_t i = 0; i < count; i++) {
+    BusInfo info;
+    if (component->getBusInfo(MediaTypes::kEvent, BusDirections::kInput, i,
+                              info) != kResultOk)
+      continue;
 
-	FUnknownPtr<IAudioProcessor> processor = component;
-	if (!processor)
-		return;
+    auto busName = StringConvert::convert(info.name, 128);
+    iosetup.inputs.push_back(busName);
+  }
 
-	processor->setProcessing (false);
-	component->setActive (false);
+  count = component->getBusCount(MediaTypes::kEvent, BusDirections::kOutput);
+  for (int32_t i = 0; i < count; i++) {
+    BusInfo info;
+    if (component->getBusInfo(MediaTypes::kEvent, BusDirections::kOutput, i,
+                              info) != kResultOk)
+      continue;
+
+    auto busName = StringConvert::convert(info.name, 128);
+    iosetup.outputs.push_back(busName);
+  }
+
+  return iosetup;
 }
 
 //------------------------------------------------------------------------
-void AudioClient::initProcessData ()
-{
-	// processData.prepare will be done in setBlockSize
+IAudioClient::IOSetup AudioClient::getIOSetup() const {
+  IAudioClient::IOSetup iosetup;
+  auto count =
+      component->getBusCount(MediaTypes::kAudio, BusDirections::kOutput);
+  for (int32_t i = 0; i < count; i++) {
+    BusInfo info;
+    if (component->getBusInfo(MediaTypes::kAudio, BusDirections::kOutput, i,
+                              info) != kResultOk)
+      continue;
 
-	processData.inputEvents = &eventList;
-	processData.inputParameterChanges = &inputParameterChanges;
-	processData.processContext = &processContext;
+    for (int32_t j = 0; j < info.channelCount; j++) {
+      auto channelName = StringConvert::convert(info.name, 128);
+      iosetup.outputs.push_back(channelName + " " + std::to_string(j));
+    }
+  }
 
-	initProcessContext ();
+  count = component->getBusCount(MediaTypes::kAudio, BusDirections::kInput);
+  for (int32_t i = 0; i < count; i++) {
+    BusInfo info;
+    if (component->getBusInfo(MediaTypes::kAudio, BusDirections::kInput, i,
+                              info) != kResultOk)
+      continue;
+
+    for (int32_t j = 0; j < info.channelCount; j++) {
+      auto channelName = StringConvert::convert(info.name, 128);
+      iosetup.inputs.push_back(channelName + " " + std::to_string(j));
+    }
+  }
+
+  return iosetup;
 }
 
 //------------------------------------------------------------------------
-IMidiClient::IOSetup AudioClient::getMidiIOSetup () const
-{
-	IMidiClient::IOSetup iosetup;
-	auto count = component->getBusCount (MediaTypes::kEvent, BusDirections::kInput);
-	for (int32_t i = 0; i < count; i++)
-	{
-		BusInfo info;
-		if (component->getBusInfo (MediaTypes::kEvent, BusDirections::kInput, i, info) != kResultOk)
-			continue;
-
-		auto busName = StringConvert::convert (info.name, 128);
-		iosetup.inputs.push_back (busName);
-	}
-
-	count = component->getBusCount (MediaTypes::kEvent, BusDirections::kOutput);
-	for (int32_t i = 0; i < count; i++)
-	{
-		BusInfo info;
-		if (component->getBusInfo (MediaTypes::kEvent, BusDirections::kOutput, i, info) !=
-		    kResultOk)
-			continue;
-
-		auto busName = StringConvert::convert (info.name, 128);
-		iosetup.outputs.push_back (busName);
-	}
-
-	return iosetup;
+void AudioClient::preprocess(Buffers &buffers, int64_t continousFrames) {
+  processData.numSamples = buffers.numSamples;
+  processContext.continousTimeSamples = continousFrames;
+  assignBusBuffers(buffers, processData);
+  paramTransferrer.transferChangesTo(inputParameterChanges);
 }
 
 //------------------------------------------------------------------------
-IAudioClient::IOSetup AudioClient::getIOSetup () const
-{
-	IAudioClient::IOSetup iosetup;
-	auto count = component->getBusCount (MediaTypes::kAudio, BusDirections::kOutput);
-	for (int32_t i = 0; i < count; i++)
-	{
-		BusInfo info;
-		if (component->getBusInfo (MediaTypes::kAudio, BusDirections::kOutput, i, info) !=
-		    kResultOk)
-			continue;
+bool AudioClient::process(Buffers &buffers, int64_t continousFrames) {
+  FUnknownPtr<IAudioProcessor> processor = component;
+  if (!processor || !isProcessing)
+    return false;
 
-		for (int32_t j = 0; j < info.channelCount; j++)
-		{
-			auto channelName = StringConvert::convert (info.name, 128);
-			iosetup.outputs.push_back (channelName + " " + std::to_string (j));
-		}
-	}
+  preprocess(buffers, continousFrames);
 
-	count = component->getBusCount (MediaTypes::kAudio, BusDirections::kInput);
-	for (int32_t i = 0; i < count; i++)
-	{
-		BusInfo info;
-		if (component->getBusInfo (MediaTypes::kAudio, BusDirections::kInput, i, info) != kResultOk)
-			continue;
+  if (processor->process(processData) != kResultOk)
+    return false;
 
-		for (int32_t j = 0; j < info.channelCount; j++)
-		{
-			auto channelName = StringConvert::convert (info.name, 128);
-			iosetup.inputs.push_back (channelName + " " + std::to_string (j));
-		}
-	}
+  postprocess(buffers);
 
-	return iosetup;
+  return true;
+}
+//------------------------------------------------------------------------
+void AudioClient::postprocess(Buffers &buffers) {
+  eventList.clear();
+  inputParameterChanges.clearQueue();
+  unassignBusBuffers(buffers, processData);
 }
 
 //------------------------------------------------------------------------
-void AudioClient::preprocess (Buffers& buffers, int64_t continousFrames)
-{
-	processData.numSamples = buffers.numSamples;
-	processContext.continousTimeSamples = continousFrames;
-	assignBusBuffers (buffers, processData);
-	paramTransferrer.transferChangesTo (inputParameterChanges);
+bool AudioClient::setSamplerate(SampleRate value) {
+  if (sampleRate == value)
+    return true;
+
+  sampleRate = value;
+  processContext.sampleRate = sampleRate;
+  if (blockSize == 0)
+    return true;
+
+  return updateProcessSetup();
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::process (Buffers& buffers, int64_t continousFrames)
-{
-	FUnknownPtr<IAudioProcessor> processor = component;
-	if (!processor || !isProcessing)
-		return false;
+bool AudioClient::setBlockSize(int32 value) {
+  if (blockSize == value)
+    return true;
 
-	preprocess (buffers, continousFrames);
+  blockSize = value;
+  if (sampleRate == 0)
+    return true;
 
-	if (processor->process (processData) != kResultOk)
-		return false;
-
-	postprocess (buffers);
-
-	return true;
-}
-//------------------------------------------------------------------------
-void AudioClient::postprocess (Buffers& buffers)
-{
-	eventList.clear ();
-	inputParameterChanges.clearQueue ();
-	unassignBusBuffers (buffers, processData);
+  processData.prepare(*component, blockSize, kSample32);
+  return updateProcessSetup();
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::setSamplerate (SampleRate value)
-{
-	if (sampleRate == value)
-		return true;
+bool AudioClient::updateProcessSetup() {
+  FUnknownPtr<IAudioProcessor> processor = component;
+  if (!processor)
+    return false;
 
-	sampleRate = value;
-	processContext.sampleRate = sampleRate;
-	if (blockSize == 0)
-		return true;
+  if (isProcessing) {
+    if (processor->setProcessing(false) != kResultOk)
+      return false;
 
-	return updateProcessSetup ();
+    if (component->setActive(false) != kResultOk)
+      return false;
+  }
+
+  ProcessSetup setup{kRealtime, kSample32, blockSize, sampleRate};
+
+  int busCount = component->getBusCount(kAudio, kInput);
+
+  for (int i = 0; i < busCount; i++) {
+    BusInfo bus;
+    if (component->getBusInfo(kAudio, kInput, i, bus)) {
+      continue;
+    }
+    printf("busIndex: %d, name: %s\n", i, (const char *)bus.name);
+  }
+
+  SpeakerArrangement arr;
+  if (processor->getBusArrangement(kInput, 0, arr)) {
+    return false;
+  }
+
+  if (processor->setupProcessing(setup) != kResultOk)
+    return false;
+
+  if (component->activateBus(kAudio, kInput, 0, true)) {
+    return false;
+  }
+  if (component->activateBus(kAudio, kOutput, 0, true)) {
+    return false;
+  }
+
+  if (component->setActive(true) != kResultOk)
+    return false;
+
+  if (processor->setProcessing(true) != kResultOk)
+    return false;
+
+  isProcessing = true;
+  return isProcessing;
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::setBlockSize (int32 value)
-{
-	if (blockSize == value)
-		return true;
-
-	blockSize = value;
-	if (sampleRate == 0)
-		return true;
-
-	processData.prepare (*component, blockSize, kSample32);
-	return updateProcessSetup ();
+bool AudioClient::isPortInRange(int32 port, int32 channel) const {
+  return port < kMaxMidiMappingBusses && !midiCCMapping[port][channel].empty();
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::updateProcessSetup ()
-{
-	FUnknownPtr<IAudioProcessor> processor = component;
-	if (!processor)
-		return false;
+bool AudioClient::processVstEvent(const IMidiClient::Event &event, int32 port) {
+  auto vstEvent =
+      midiToEvent(event.type, event.channel, event.data0, event.data1);
+  if (vstEvent) {
+    vstEvent->busIndex = port;
+    if (eventList.addEvent(*vstEvent) != kResultOk) {
+      assert(false && "Event was not added to EventList!");
+    }
 
-	if (isProcessing)
-	{
-		if (processor->setProcessing (false) != kResultOk)
-			return false;
+    return true;
+  }
 
-		if (component->setActive (false) != kResultOk)
-			return false;
-	}
-
-	ProcessSetup setup {kRealtime, kSample32, blockSize, sampleRate};
-
-	int busCount = component->getBusCount(kAudio, kInput);
-
-	for (int i = 0; i < busCount; i++) {
-		BusInfo bus;
-		if (component->getBusInfo(kAudio, kInput, i, bus)) {
-			continue;
-		}
-		printf("busIndex: %d, name: %s\n", i, (const char*)bus.name);
-	}
-
-	SpeakerArrangement arr;
-	if (processor->getBusArrangement(kInput, 0, arr)) {
-		return false;
-	}
-
-	if (processor->setupProcessing (setup) != kResultOk)
-		return false;
-	
-	if (component->activateBus (kAudio, kInput, 0, true)) {
-		return false;
-	}
-	if (component->activateBus (kAudio, kOutput, 0, true)) {
-		return false;
-	}
-
-	if (component->setActive (true) != kResultOk)
-		return false;
-
-	if (processor->setProcessing(true) != kResultOk)
-		return false;
-
-	isProcessing = true;
-	return isProcessing;
+  return false;
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::isPortInRange (int32 port, int32 channel) const
-{
-	return port < kMaxMidiMappingBusses && !midiCCMapping[port][channel].empty ();
+bool AudioClient::processParamChange(const IMidiClient::Event &event,
+                                     int32 port) {
+  auto paramMapping = [port, this](int32 channel, MidiData data1) -> ParamID {
+    if (!isPortInRange(port, channel))
+      return kNoParamId;
+
+    return midiCCMapping[port][channel][data1];
+  };
+
+  auto paramChange = midiToParameter(event.type, event.channel, event.data0,
+                                     event.data1, paramMapping);
+  if (paramChange) {
+    int32 index = 0;
+    IParamValueQueue *queue =
+        inputParameterChanges.addParameterData((*paramChange).first, index);
+    if (queue) {
+      if (queue->addPoint(static_cast<int32>(event.timestamp),
+                          (*paramChange).second, index) != kResultOk) {
+        assert(false && "Parameter point was not added to ParamValueQueue!");
+      }
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::processVstEvent (const IMidiClient::Event& event, int32 port)
-{
-	auto vstEvent = midiToEvent (event.type, event.channel, event.data0, event.data1);
-	if (vstEvent)
-	{
-		vstEvent->busIndex = port;
-		if (eventList.addEvent (*vstEvent) != kResultOk)
-		{
-			assert (false && "Event was not added to EventList!");
-		}
+bool AudioClient::onEvent(const IMidiClient::Event &event, int32_t port) {
+  // Try to create Event first.
+  if (processVstEvent(event, port))
+    return true;
 
-		return true;
-	}
+  // In case this is no event it must be a parameter.
+  if (processParamChange(event, port))
+    return true;
 
-	return false;
+  // TODO: Something else???
+
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::processParamChange (const IMidiClient::Event& event, int32 port)
-{
-	auto paramMapping = [port, this] (int32 channel, MidiData data1) -> ParamID {
-		if (!isPortInRange (port, channel))
-			return kNoParamId;
-
-		return midiCCMapping[port][channel][data1];
-	};
-
-	auto paramChange =
-	    midiToParameter (event.type, event.channel, event.data0, event.data1, paramMapping);
-	if (paramChange)
-	{
-		int32 index = 0;
-		IParamValueQueue* queue =
-		    inputParameterChanges.addParameterData ((*paramChange).first, index);
-		if (queue)
-		{
-			if (queue->addPoint (static_cast<int32> (event.timestamp), (*paramChange).second,
-			                     index) != kResultOk)
-			{
-				assert (false && "Parameter point was not added to ParamValueQueue!");
-			}
-		}
-
-		return true;
-	}
-
-	return false;
+void AudioClient::setParameter(ParamID id, ParamValue value,
+                               int32 sampleOffset) {
+  paramTransferrer.addChange(id, value, sampleOffset);
 }
 
 //------------------------------------------------------------------------
-bool AudioClient::onEvent (const IMidiClient::Event& event, int32_t port)
-{
-	// Try to create Event first.
-	if (processVstEvent (event, port))
-		return true;
-
-	// In case this is no event it must be a parameter.
-	if (processParamChange (event, port))
-		return true;
-
-	// TODO: Something else???
-
-	return true;
-}
-
-//------------------------------------------------------------------------
-void AudioClient::setParameter (ParamID id, ParamValue value, int32 sampleOffset)
-{
-	paramTransferrer.addChange (id, value, sampleOffset);
-}
-
-//------------------------------------------------------------------------
-} // Vst
-} // Steinberg
+} // namespace Vst
+} // namespace Steinberg

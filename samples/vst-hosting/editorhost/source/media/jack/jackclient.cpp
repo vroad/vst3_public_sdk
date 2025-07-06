@@ -3,7 +3,8 @@
 // Project     : VST SDK
 //
 // Category    : EditorHost
-// Filename    : public.sdk/samples/vst-hosting/editorhost/source/media/jack/jackclient.cpp
+// Filename    :
+// public.sdk/samples/vst-hosting/editorhost/source/media/jack/jackclient.cpp
 // Created by  : Steinberg 09.2016
 // Description : Audio Host Example for VST 3 using Jack
 //
@@ -11,8 +12,8 @@
 // LICENSE
 // (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
 //   * Redistributions of source code must retain the above copyright notice,
 //     this list of conditions and the following disclaimer.
@@ -23,16 +24,17 @@
 //     contributors may be used to endorse or promote products derived from this
 //     software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #include "public.sdk/samples/vst-hosting/editorhost/source/media/imediaserver.h"
@@ -57,441 +59,420 @@ namespace Vst {
 
 static const int kJackSuccess = 0;
 
-#define TABLE_SIZE   (200)
-typedef struct
-{
-	float sine[TABLE_SIZE];
-	int left_phase;
-	int right_phase;
-}
-paTestData;
+#define TABLE_SIZE (200)
+typedef struct {
+  float sine[TABLE_SIZE];
+  int left_phase;
+  int right_phase;
+} paTestData;
 
 //------------------------------------------------------------------------
 //  jack Client
 //------------------------------------------------------------------------
-class JackClient : public IMediaServer
-{
+class JackClient : public IMediaServer {
 public:
-//--------------------------------------------------------------------
-	using JackPorts = std::vector<jack_port_t*>;
-	using JackName = std::string;
+  //--------------------------------------------------------------------
+  using JackPorts = std::vector<jack_port_t *>;
+  using JackName = std::string;
 
-	JackClient ();
-	~JackClient () override;
+  JackClient();
+  ~JackClient() override;
 
-	// IMediaServer interface
-	bool registerAudioClient (IAudioClient* client) override;
-	bool registerMidiClient (IMidiClient* client) override;
+  // IMediaServer interface
+  bool registerAudioClient(IAudioClient *client) override;
+  bool registerMidiClient(IMidiClient *client) override;
 
-	bool initialize (JackName name, const JackServerOptions& options);
+  bool initialize(JackName name, const JackServerOptions &options);
 
-	// jack process callback
-	int process (jack_nframes_t nframes);
+  // jack process callback
+  int process(jack_nframes_t nframes);
 
-//--------------------------------------------------------------------
+  //--------------------------------------------------------------------
 private:
-	jack_client_t* registerClient (JackName name);
-	bool registerAudioPorts (IAudioClient* processor);
-	bool registerMidiPorts (IMidiClient* processor);
-	bool addAudioOutputPort (JackName name);
-	bool addAudioInputPort (JackName name);
-	bool addMidiInputPort (JackName name);
-	int processMidi (jack_nframes_t nframes);
-	bool setupJackProcessCallbacks (jack_client_t* client);
-	bool autoConnectAudioPorts (jack_client_t* client);
-	bool connectAudioPorts (jack_client_t* client);
-	bool autoConnectMidiPorts (jack_client_t* client);
-	void updateAudioBuffers (jack_nframes_t nframes);
+  jack_client_t *registerClient(JackName name);
+  bool registerAudioPorts(IAudioClient *processor);
+  bool registerMidiPorts(IMidiClient *processor);
+  bool addAudioOutputPort(JackName name);
+  bool addAudioInputPort(JackName name);
+  bool addMidiInputPort(JackName name);
+  int processMidi(jack_nframes_t nframes);
+  bool setupJackProcessCallbacks(jack_client_t *client);
+  bool autoConnectAudioPorts(jack_client_t *client);
+  bool connectAudioPorts(jack_client_t *client);
+  bool autoConnectMidiPorts(jack_client_t *client);
+  void updateAudioBuffers(jack_nframes_t nframes);
 
-	// Jack objects
-	jack_client_t* jackClient = nullptr;
-	JackPorts audioOutputPorts;
-	JackPorts audioInputPorts;
-	JackPorts midiInputPorts;
+  // Jack objects
+  jack_client_t *jackClient = nullptr;
+  JackPorts audioOutputPorts;
+  JackPorts audioInputPorts;
+  JackPorts midiInputPorts;
 
-	IAudioClient* audioClient = nullptr;
-	IMidiClient* midiClient = nullptr;
-	using BufferPointers = std::vector<jack_default_audio_sample_t*>;
-	BufferPointers audioOutputPointers;
-	BufferPointers audioInputPointers;
-	IAudioClient::Buffers buffers {nullptr};
-	bool autoConnectAudioFlag {true};
-	std::unordered_map<std::string, std::string> manualOutputPorts;
-	std::unordered_map<std::string, jack_port_t*> outputPortNameToPorts;
-}; 
+  IAudioClient *audioClient = nullptr;
+  IMidiClient *midiClient = nullptr;
+  using BufferPointers = std::vector<jack_default_audio_sample_t *>;
+  BufferPointers audioOutputPointers;
+  BufferPointers audioInputPointers;
+  IAudioClient::Buffers buffers{nullptr};
+  bool autoConnectAudioFlag{true};
+  std::unordered_map<std::string, std::string> manualOutputPorts;
+  std::unordered_map<std::string, jack_port_t *> outputPortNameToPorts;
+};
 
 //------------------------------------------------------------------------
 
-int jack_on_process (jack_nframes_t nframes, void* arg)
-{
-	auto client = reinterpret_cast<JackClient*> (arg);
-	return client->process (nframes);
+int jack_on_process(jack_nframes_t nframes, void *arg) {
+  auto client = reinterpret_cast<JackClient *>(arg);
+  return client->process(nframes);
 }
 
 //------------------------------------------------------------------------
-int jack_on_set_sample_rate (jack_nframes_t nframes, void* arg)
-{
-	auto client = reinterpret_cast<IAudioClient*> (arg);
-	client->setSamplerate (static_cast<SampleRate> (nframes));
-	return kJackSuccess;
+int jack_on_set_sample_rate(jack_nframes_t nframes, void *arg) {
+  auto client = reinterpret_cast<IAudioClient *>(arg);
+  client->setSamplerate(static_cast<SampleRate>(nframes));
+  return kJackSuccess;
 }
 
 //------------------------------------------------------------------------
-int jack_on_set_block_size (jack_nframes_t nframes, void* arg)
-{
-	auto client = reinterpret_cast<IAudioClient*> (arg);
-	client->setBlockSize (static_cast<int32> (nframes));
-	return kJackSuccess;
+int jack_on_set_block_size(jack_nframes_t nframes, void *arg) {
+  auto client = reinterpret_cast<IAudioClient *>(arg);
+  client->setBlockSize(static_cast<int32>(nframes));
+  return kJackSuccess;
 }
 
 //------------------------------------------------------------------------
-IMediaServerPtr createJackMediaServer (const AudioClientName& name, const JackServerOptions& options)
-{
-	auto client = std::make_shared<JackClient> ();
-	client->initialize (name, options);
-	return client;
+IMediaServerPtr createJackMediaServer(const AudioClientName &name,
+                                      const JackServerOptions &options) {
+  auto client = std::make_shared<JackClient>();
+  client->initialize(name, options);
+  return client;
 }
 
 //-----
-JackClient::JackClient() {
+JackClient::JackClient() {}
+
+//------------------------------------------------------------------------
+JackClient::~JackClient() {
+  //! We do not need to "unregister" ports. It is done automatically with
+  //! "jack_client_close"
+  jack_deactivate(jackClient); // Stops calls of process
+  jack_client_close(
+      jackClient); // Remove client from process graph and remove all ports
 }
 
 //------------------------------------------------------------------------
-JackClient::~JackClient ()
-{
-	//! We do not need to "unregister" ports. It is done automatically with "jack_client_close"
-	jack_deactivate (jackClient); // Stops calls of process
-	jack_client_close (jackClient); // Remove client from process graph and remove all ports
+bool JackClient::registerAudioClient(IAudioClient *client) {
+  if (audioClient)
+    return false;
+
+  audioClient = client;
+
+  //! First thing to do: register the audio ports.
+  if (!registerAudioPorts(audioClient))
+    return false;
+
+  //! Setup all the callbacks like setSampleRate and process etc.
+  if (!setupJackProcessCallbacks(jackClient))
+    return false;
+
+  //! Activate after defining the callbacks. It is said in the documentation.
+  if (jack_activate(jackClient) != kJackSuccess)
+    return false;
+
+  //! AFTER activation, register the ports.
+  if (autoConnectAudioFlag) {
+    if (!autoConnectAudioPorts(jackClient))
+      return false;
+  } else if (!manualOutputPorts.empty()) {
+    if (!connectAudioPorts(jackClient))
+      return false;
+  }
+
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::registerAudioClient (IAudioClient* client)
-{
-	if (audioClient)
-		return false;
+bool JackClient::registerMidiClient(IMidiClient *client) {
+  if (midiClient)
+    return false;
 
-	audioClient = client;
+  midiClient = client;
 
-	//! First thing to do: register the audio ports.
-	if (!registerAudioPorts (audioClient))
-		return false;
+  //! Register the midi ports.
+  if (!registerMidiPorts(midiClient))
+    return false;
 
-	//! Setup all the callbacks like setSampleRate and process etc.
-	if (!setupJackProcessCallbacks (jackClient))
-		return false;
+  //! Afterwards auto-connect them.
+  if (!autoConnectMidiPorts(jackClient))
+    return false;
 
-	//! Activate after defining the callbacks. It is said in the documentation.
-	if (jack_activate (jackClient) != kJackSuccess)
-		return false;
-
-	//! AFTER activation, register the ports.
-	if (autoConnectAudioFlag)
-	{
-		if (!autoConnectAudioPorts (jackClient))
-			return false;
-	}
-	else if (!manualOutputPorts.empty ())
-	{
-		if (!connectAudioPorts (jackClient))
-			return false;
-	}
-
-	return true;
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::registerMidiClient (IMidiClient* client)
-{
-	if (midiClient)
-		return false;
+bool JackClient::initialize(JackClient::JackName name,
+                            const JackServerOptions &options) {
+  jackClient = registerClient(name);
+  if (!jackClient)
+    return false;
 
-	midiClient = client;
+  autoConnectAudioFlag = options.autoConnectAudio;
+  manualOutputPorts = options.outputPorts;
 
-	//! Register the midi ports.
-	if (!registerMidiPorts (midiClient))
-		return false;
-
-	//! Afterwards auto-connect them.
-	if (!autoConnectMidiPorts (jackClient))
-		return false;
-
-	return true;
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::initialize (JackClient::JackName name, const JackServerOptions& options)
-{
-	jackClient = registerClient (name);
-	if (!jackClient)
-		return false;
+void JackClient::updateAudioBuffers(jack_nframes_t nframes) {
+  int outputIndex = 0;
+  for (auto audioOutputPort : audioOutputPorts) {
+    auto *portBuffer = jack_port_get_buffer(audioOutputPort, nframes);
+    if (!portBuffer)
+      continue;
 
-	autoConnectAudioFlag = options.autoConnectAudio;
-	manualOutputPorts = options.outputPorts;
+    buffers.outputs[outputIndex++] =
+        static_cast<jack_default_audio_sample_t *>(portBuffer);
+  }
 
-	return true;
+  int inputIndex = 0;
+  for (auto audioInputPort : audioInputPorts) {
+    auto *portBuffer = jack_port_get_buffer(audioInputPort, nframes);
+    if (!portBuffer)
+      continue;
+
+    buffers.inputs[inputIndex++] =
+        static_cast<jack_default_audio_sample_t *>(portBuffer);
+  }
 }
 
 //------------------------------------------------------------------------
-void JackClient::updateAudioBuffers (jack_nframes_t nframes)
-{
-	int outputIndex = 0;
-	for (auto audioOutputPort : audioOutputPorts)
-	{
-		auto* portBuffer = jack_port_get_buffer (audioOutputPort, nframes);
-		if (!portBuffer)
-			continue;
+int JackClient::process(jack_nframes_t nframes) {
+  buffers.numSamples = nframes;
 
-		buffers.outputs[outputIndex++] = static_cast<jack_default_audio_sample_t*> (portBuffer);
-	}
+  updateAudioBuffers(nframes);
+  if (!audioClient)
+    return 0;
 
-	int inputIndex = 0;
-	for (auto audioInputPort : audioInputPorts)
-	{
-		auto* portBuffer = jack_port_get_buffer (audioInputPort, nframes);
-		if (!portBuffer)
-			continue;
+  if (audioClient->process(buffers, jack_last_frame_time(jackClient)) ==
+      false) {
+    assert(false);
+  }
 
-		buffers.inputs[inputIndex++] = static_cast<jack_default_audio_sample_t*> (portBuffer);
-	}
+  return 0;
+
+  // processMidi (nframes);
+  // buffers.numSamples = nframes;
+
+  // updateAudioBuffers (nframes);
+  // if (!audioClient)
+  // 	return 0;
+
+  // if (audioClient->process (buffers, jack_last_frame_time (jackClient)) ==
+  // false)
+  // {
+  // 	assert (false);
+  // }
+
+  // return kJackSuccess;
 }
 
 //------------------------------------------------------------------------
-int JackClient::process (jack_nframes_t nframes)
-{
-	buffers.numSamples = nframes;
+bool JackClient::registerAudioPorts(IAudioClient *processor) {
+  auto ioSetup = processor->getIOSetup();
 
-	updateAudioBuffers (nframes);
-	if (!audioClient)
-		return 0;
+  for (const auto &output : ioSetup.outputs)
+    addAudioOutputPort(output);
 
-	if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false) {
-		assert (false);
-	}
+  for (const auto &input : ioSetup.inputs)
+    addAudioInputPort(input);
 
-	return 0;
+  buffers.inputs = audioInputPointers.data();
+  buffers.numInputs = (int32_t)audioInputPointers.size();
+  buffers.numOutputs = (int32_t)audioOutputPointers.size();
+  buffers.outputs = audioOutputPointers.data();
 
-	// processMidi (nframes);
-	// buffers.numSamples = nframes;
-
-	// updateAudioBuffers (nframes);
-	// if (!audioClient)
-	// 	return 0;
-
-	// if (audioClient->process (buffers, jack_last_frame_time (jackClient)) == false)
-	// {
-	// 	assert (false);
-	// }
-
-	// return kJackSuccess;
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::registerAudioPorts (IAudioClient* processor)
-{
-	auto ioSetup = processor->getIOSetup ();
+bool JackClient::registerMidiPorts(IMidiClient *processor) {
+  const auto ioSetup = processor->getMidiIOSetup();
+  for (const auto &input : ioSetup.inputs)
+    addMidiInputPort(input);
 
-	for (const auto& output : ioSetup.outputs)
-		addAudioOutputPort (output);
-
-	for (const auto& input : ioSetup.inputs)
-		addAudioInputPort (input);
-
-	buffers.inputs = audioInputPointers.data ();
-	buffers.numInputs = (int32_t)audioInputPointers.size ();
-	buffers.numOutputs = (int32_t)audioOutputPointers.size ();
-	buffers.outputs = audioOutputPointers.data ();
-
-	return true;
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::registerMidiPorts (IMidiClient* processor)
-{
-	const auto ioSetup = processor->getMidiIOSetup ();
-	for (const auto& input : ioSetup.inputs)
-		addMidiInputPort (input);
+bool JackClient::addAudioOutputPort(JackClient::JackName name) {
+  auto port = jack_port_register(jackClient, name.data(),
+                                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+  if (!port)
+    return false;
 
-	return true;
+  audioOutputPorts.push_back(port);
+  audioOutputPointers.resize(audioOutputPorts.size());
+  outputPortNameToPorts[name] = port;
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::addAudioOutputPort (JackClient::JackName name)
-{
-	auto port =
-	    jack_port_register (jackClient, name.data (), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-	if (!port)
-		return false;
+bool JackClient::addAudioInputPort(JackClient::JackName name) {
+  auto port = jack_port_register(jackClient, name.data(),
+                                 JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+  if (!port)
+    return false;
 
-	audioOutputPorts.push_back (port);
-	audioOutputPointers.resize (audioOutputPorts.size ());
-	outputPortNameToPorts[name] = port;
-	return true;
+  audioInputPorts.push_back(port);
+  audioInputPointers.resize(audioInputPorts.size());
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::addAudioInputPort (JackClient::JackName name)
-{
-	auto port =
-	    jack_port_register (jackClient, name.data (), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-	if (!port)
-		return false;
+bool JackClient::addMidiInputPort(JackClient::JackName name) {
+  auto port = jack_port_register(jackClient, name.data(),
+                                 JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
+  if (!port)
+    return false;
 
-	audioInputPorts.push_back (port);
-	audioInputPointers.resize (audioInputPorts.size ());
-	return true;
+  midiInputPorts.push_back(port);
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::addMidiInputPort (JackClient::JackName name)
-{
-	auto port =
-	    jack_port_register (jackClient, name.data (), JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-	if (!port)
-		return false;
+int JackClient::processMidi(jack_nframes_t nframes) {
+  static const uint8_t kChannelMask = 0x0F;
+  static const uint8_t kStatusMask = 0xF0;
+  static const uint32_t kDataMask = 0x7F;
 
-	midiInputPorts.push_back (port);
-	return true;
+  for (int32_t portIndex = 0,
+               count = static_cast<int32_t>(midiInputPorts.size());
+       portIndex < count; ++portIndex) {
+    auto midiInputPort = midiInputPorts.at(portIndex);
+    auto *portBuffer = jack_port_get_buffer(midiInputPort, nframes);
+    if (!portBuffer)
+      continue;
+
+    jack_midi_event_t in_event;
+    auto event_count = jack_midi_get_event_count(portBuffer);
+    for (uint32_t i = 0; i < event_count; i++) {
+      jack_midi_event_get(&in_event, portBuffer, i);
+      if (in_event.size == 0)
+        continue;
+
+      auto midiData = in_event.buffer;
+      Steinberg::Vst::IMidiClient::MidiData channel =
+          midiData[0] & kChannelMask;
+      Steinberg::Vst::IMidiClient::MidiData status = midiData[0] & kStatusMask;
+      Steinberg::Vst::IMidiClient::MidiData data0 = midiData[1];
+      Steinberg::Vst::IMidiClient::MidiData data1 = midiData[2];
+      midiClient->onEvent({status, channel, data0, data1, in_event.time},
+                          portIndex);
+    }
+  }
+
+  return kJackSuccess;
 }
 
 //------------------------------------------------------------------------
-int JackClient::processMidi (jack_nframes_t nframes)
-{
-	static const uint8_t kChannelMask = 0x0F;
-	static const uint8_t kStatusMask = 0xF0;
-	static const uint32_t kDataMask = 0x7F;
+jack_client_t *JackClient::registerClient(JackClient::JackName name) {
+  jack_options_t options = JackNullOption;
+  jack_status_t status;
 
-	for (int32_t portIndex = 0, count = static_cast<int32_t> (midiInputPorts.size ());
-	     portIndex < count; ++portIndex)
-	{
-		auto midiInputPort = midiInputPorts.at (portIndex);
-		auto* portBuffer = jack_port_get_buffer (midiInputPort, nframes);
-		if (!portBuffer)
-			continue;
+  jackClient = jack_client_open(name.data(), options, &status, nullptr);
+  return jackClient;
 
-		jack_midi_event_t in_event;
-		auto event_count = jack_midi_get_event_count (portBuffer);
-		for (uint32_t i = 0; i < event_count; i++)
-		{
-			jack_midi_event_get (&in_event, portBuffer, i);
-			if (in_event.size == 0)
-				continue;
-
-			auto midiData = in_event.buffer;
-			Steinberg::Vst::IMidiClient::MidiData channel = midiData[0] & kChannelMask;
-			Steinberg::Vst::IMidiClient::MidiData status = midiData[0] & kStatusMask;
-			Steinberg::Vst::IMidiClient::MidiData data0 = midiData[1];
-			Steinberg::Vst::IMidiClient::MidiData data1 = midiData[2];
-			midiClient->onEvent ({status, channel, data0, data1, in_event.time}, portIndex);
-		}
-	}
-
-	return kJackSuccess;
+  /* Use the status to check for errors:
+      if (status & JackServerFailed)
+      {
+          fprintf (stderr, "Unable to connect to JACK server\n");
+      }*/
 }
 
 //------------------------------------------------------------------------
-jack_client_t* JackClient::registerClient (JackClient::JackName name)
-{
-	jack_options_t options = JackNullOption;
-	jack_status_t status;
+bool JackClient::setupJackProcessCallbacks(jack_client_t *client) {
+  if (jack_set_process_callback(client, jack_on_process, this) != kJackSuccess)
+    return false;
 
-	jackClient = jack_client_open (name.data (), options, &status, nullptr);
-	return jackClient;
+  if (jack_set_sample_rate_callback(client, jack_on_set_sample_rate,
+                                    audioClient) != kJackSuccess)
+    return false;
 
-	/* Use the status to check for errors:
-	    if (status & JackServerFailed)
-	    {
-	        fprintf (stderr, "Unable to connect to JACK server\n");
-	    }*/
+  if (jack_set_buffer_size_callback(client, jack_on_set_block_size,
+                                    audioClient) != kJackSuccess)
+    return false;
+
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::setupJackProcessCallbacks (jack_client_t* client)
-{
-	if (jack_set_process_callback (client, jack_on_process, this) != kJackSuccess)
-		return false;
+bool JackClient::autoConnectAudioPorts(jack_client_t *client) {
+  int portIndex = 0;
 
-	if (jack_set_sample_rate_callback (client, jack_on_set_sample_rate, audioClient) !=
-	    kJackSuccess)
-		return false;
+  //! Connect Audio Outputs
+  auto ports = jack_get_ports(client, nullptr, nullptr,
+                              JackPortIsPhysical | JackPortIsInput);
+  for (auto &port : audioOutputPorts) {
+    if (!ports[portIndex])
+      break;
 
-	if (jack_set_buffer_size_callback (client, jack_on_set_block_size, audioClient) != kJackSuccess)
-		return false;
+    auto output__port_name = ports[portIndex++];
+    auto res = jack_connect(client, jack_port_name(port), output__port_name);
+    if (res != 0)
+      break;
+  }
 
-	return true;
+  jack_free(ports);
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::autoConnectAudioPorts (jack_client_t* client)
-{
-	int portIndex = 0;
+bool JackClient::connectAudioPorts(jack_client_t *client) {
+  int portIndex = 0;
 
-	//! Connect Audio Outputs
-	auto ports = jack_get_ports (client, nullptr, nullptr, JackPortIsPhysical | JackPortIsInput);
-	for (auto& port : audioOutputPorts)
-	{
-		if (!ports[portIndex])
-			break;
+  for (auto &manualPortIt : manualOutputPorts) {
+    auto &partialSrcPortName = manualPortIt.first;
+    auto &dstPortName = manualPortIt.second;
+    auto portIt = outputPortNameToPorts.find(partialSrcPortName);
 
-		auto output__port_name = ports[portIndex++];
-		auto res = jack_connect (client, jack_port_name (port), output__port_name);
-		if (res != 0)
-			break;
-	}
+    if (portIt == outputPortNameToPorts.end())
+      continue;
 
-	jack_free (ports);
-	return true;
+    auto port = portIt->second;
+
+    printf("connecting: %s %s\n", jack_port_name(port), dstPortName.c_str());
+    auto res = jack_connect(client, jack_port_name(port), dstPortName.c_str());
+    if (res != 0)
+      break;
+  }
+
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::connectAudioPorts (jack_client_t* client)
-{
-	int portIndex = 0;
+bool JackClient::autoConnectMidiPorts(jack_client_t *client) {
+  int portIndex = 1;
 
-	for (auto& manualPortIt : manualOutputPorts)
-	{
-		auto& partialSrcPortName = manualPortIt.first;
-		auto& dstPortName = manualPortIt.second;
-		auto portIt = outputPortNameToPorts.find(partialSrcPortName);
+  //! Connect MIDI Inputs
+  auto ports = jack_get_ports(client, nullptr, "midi",
+                              JackPortIsPhysical | JackPortIsOutput);
+  if (!ports)
+    return false;
 
-		if (portIt == outputPortNameToPorts.end())
-			continue;
+  for (auto &port : midiInputPorts) {
+    if (!ports[portIndex])
+      break;
 
-		auto port = portIt->second;
+    auto inputPortName = ports[portIndex++];
+    auto res = jack_connect(client, inputPortName, jack_port_name(port));
+    if (res != 0)
+      continue;
+  }
 
-		printf("connecting: %s %s\n", jack_port_name(port), dstPortName.c_str());
-		auto res = jack_connect (client, jack_port_name (port), dstPortName.c_str ());
-		if (res != 0)
-			break;
-	}
-
-	return true;
+  jack_free(ports);
+  return true;
 }
 
 //------------------------------------------------------------------------
-bool JackClient::autoConnectMidiPorts (jack_client_t* client)
-{
-	int portIndex = 1;
-
-	//! Connect MIDI Inputs
-	auto ports = jack_get_ports (client, nullptr, "midi", JackPortIsPhysical | JackPortIsOutput);
-	if (!ports)
-		return false;
-
-	for (auto& port : midiInputPorts)
-	{
-		if (!ports[portIndex])
-			break;
-
-		auto inputPortName = ports[portIndex++];
-		auto res = jack_connect (client, inputPortName, jack_port_name (port));
-		if (res != 0)
-			continue;
-	}
-
-	jack_free (ports);
-	return true;
-}
-
-//------------------------------------------------------------------------
-} // Vst
-} // Steinberg
+} // namespace Vst
+} // namespace Steinberg

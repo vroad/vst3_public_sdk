@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -62,7 +62,7 @@ enum MNVGTarget {
 };
 
 struct MNVGframebuffer {
-  NVGcontext* ctx;
+  NVGcontext *ctx;
   int image;
 };
 typedef struct MNVGframebuffer MNVGframebuffer;
@@ -70,47 +70,47 @@ typedef struct MNVGframebuffer MNVGframebuffer;
 // Creates a new NanoVG context. The `metalLayer` parameter should be a
 // `CAMetalLayer` object, and the `flags` should be combination of
 // `NVGcreateFlags` above.
-NVGcontext* nvgCreateMTL(void* metalLayer, int flags);
+NVGcontext *nvgCreateMTL(void *metalLayer, int flags);
 
 // Deletes the specified NanoVG context.
-void nvgDeleteMTL(NVGcontext* ctx);
+void nvgDeleteMTL(NVGcontext *ctx);
 
 //
 // Framebuffer
 //
 
 // Binds the specified framebuffer as the current render pass.
-void mnvgBindFramebuffer(MNVGframebuffer* framebuffer);
+void mnvgBindFramebuffer(MNVGframebuffer *framebuffer);
 
 // Creates a new framebuffer.
-MNVGframebuffer* mnvgCreateFramebuffer(NVGcontext* ctx, int width,
-                                       int height, int imageFlags);
+MNVGframebuffer *mnvgCreateFramebuffer(NVGcontext *ctx, int width, int height,
+                                       int imageFlags);
 
 // Deletes the specified framebuffer.
-void mnvgDeleteFramebuffer(MNVGframebuffer* framebuffer);
+void mnvgDeleteFramebuffer(MNVGframebuffer *framebuffer);
 
 //
 // Metal bridging functions
 //
 
 // Clear context on next frame, must be called before nvgEndFrame
-void mnvgClearWithColor(NVGcontext* ctx, NVGcolor color);
+void mnvgClearWithColor(NVGcontext *ctx, NVGcolor color);
 
 // Returns a pointer to the corresponded `id<MTLCommandQueue>` object.
-void* mnvgCommandQueue(NVGcontext* ctx);
+void *mnvgCommandQueue(NVGcontext *ctx);
 
 // Creates an image id from a `id<MTLTexture>` object pointer.
-int mnvgCreateImageFromHandle(NVGcontext* ctx, void* textureId, int imageFlags);
+int mnvgCreateImageFromHandle(NVGcontext *ctx, void *textureId, int imageFlags);
 
 // Returns a pointer to the corresponded `id<MTLDevice>` object.
-void* mnvgDevice(NVGcontext* ctx);
+void *mnvgDevice(NVGcontext *ctx);
 
 // Returns a pointer to the `id<MTLTexture>` object of the specified image.
-void* mnvgImageHandle(NVGcontext* ctx, int image);
+void *mnvgImageHandle(NVGcontext *ctx, int image);
 
 // Copies the pixels from the specified image into the specified `data`.
-void mnvgReadPixels(NVGcontext* ctx, int image, int x, int y, int width,
-                    int height, void* data);
+void mnvgReadPixels(NVGcontext *ctx, int image, int x, int y, int width,
+                    int height, void *data);
 
 // Returns the current OS target.
 enum MNVGTarget mnvgTarget();
@@ -119,4 +119,4 @@ enum MNVGTarget mnvgTarget();
 }
 #endif
 
-#endif  // NANOVG_MTL_H_
+#endif // NANOVG_MTL_H_

@@ -4,7 +4,8 @@
 // Project     : Steinberg Plug-In SDK
 // Filename    : public.sdk/source/common/systemclipboard_win32.cpp
 // Created by  : Steinberg 04.2020
-// Description : Simple helper allowing to copy/retrieve text to/from the system clipboard
+// Description : Simple helper allowing to copy/retrieve text to/from the system
+// clipboard
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -21,18 +22,18 @@
 //
 // THIS SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR
+// ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "systemclipboard.h"
 #include "pluginterfaces/base/fplatform.h"
+#include "systemclipboard.h"
 
 #if SMTG_OS_WINDOWS
 #include <vector>
@@ -44,118 +45,109 @@ namespace SystemClipboard {
 namespace {
 
 //------------------------------------------------------------------------
-struct Clipboard
-{
-	Clipboard () { open = OpenClipboard (nullptr); }
-	~Clipboard ()
-	{
-		if (open)
-			CloseClipboard ();
-	}
+struct Clipboard {
+  Clipboard() { open = OpenClipboard(nullptr); }
+  ~Clipboard() {
+    if (open)
+      CloseClipboard();
+  }
 
-	bool open {false};
+  bool open{false};
 };
 
 //------------------------------------------------------------------------
-std::vector<WCHAR> convertToWide (const std::string& text)
-{
-	std::vector<WCHAR> wideStr;
+std::vector<WCHAR> convertToWide(const std::string &text) {
+  std::vector<WCHAR> wideStr;
 
-	auto numChars =
-	    MultiByteToWideChar (CP_UTF8, 0, text.data (), static_cast<int> (text.size ()), nullptr, 0);
-	if (numChars)
-	{
-		wideStr.resize (static_cast<size_t> (numChars) + 1);
-		numChars = MultiByteToWideChar (CP_UTF8, 0, text.data (), static_cast<int> (text.size ()),
-		                                wideStr.data (), static_cast<int> (wideStr.size ()));
-	}
-	wideStr[numChars] = 0;
-	wideStr.resize (static_cast<size_t> (numChars) + 1);
-	return wideStr;
+  auto numChars = MultiByteToWideChar(
+      CP_UTF8, 0, text.data(), static_cast<int>(text.size()), nullptr, 0);
+  if (numChars) {
+    wideStr.resize(static_cast<size_t>(numChars) + 1);
+    numChars = MultiByteToWideChar(
+        CP_UTF8, 0, text.data(), static_cast<int>(text.size()), wideStr.data(),
+        static_cast<int>(wideStr.size()));
+  }
+  wideStr[numChars] = 0;
+  wideStr.resize(static_cast<size_t>(numChars) + 1);
+  return wideStr;
 }
 
 //------------------------------------------------------------------------
-std::string convertToUTF8 (const WCHAR* data, const SIZE_T& dataSize)
-{
-	std::string text;
-	auto numChars =
-	    WideCharToMultiByte (CP_UTF8, 0, data, static_cast<int> (dataSize / sizeof (WCHAR)),
-	                         nullptr, 0, nullptr, nullptr);
-	text.resize (static_cast<size_t> (numChars) + 1);
-	numChars = WideCharToMultiByte (CP_UTF8, 0, data, static_cast<int> (dataSize / sizeof (WCHAR)),
-	                                const_cast<char*> (text.data ()),
-	                                static_cast<int> (text.size ()), nullptr, nullptr);
-	text.resize (numChars);
-	return text;
+std::string convertToUTF8(const WCHAR *data, const SIZE_T &dataSize) {
+  std::string text;
+  auto numChars = WideCharToMultiByte(
+      CP_UTF8, 0, data, static_cast<int>(dataSize / sizeof(WCHAR)), nullptr, 0,
+      nullptr, nullptr);
+  text.resize(static_cast<size_t>(numChars) + 1);
+  numChars = WideCharToMultiByte(
+      CP_UTF8, 0, data, static_cast<int>(dataSize / sizeof(WCHAR)),
+      const_cast<char *>(text.data()), static_cast<int>(text.size()), nullptr,
+      nullptr);
+  text.resize(numChars);
+  return text;
 }
 
 //------------------------------------------------------------------------
-} // anonymous
+} // namespace
 
 //-----------------------------------------------------------------------------
-bool copyTextToClipboard (const std::string& text)
-{
-	Clipboard cb;
-	if (text.empty () || !cb.open)
-		return false;
+bool copyTextToClipboard(const std::string &text) {
+  Clipboard cb;
+  if (text.empty() || !cb.open)
+    return false;
 
-	if (!EmptyClipboard ())
-		return false;
+  if (!EmptyClipboard())
+    return false;
 
-	bool result = false;
+  bool result = false;
 
-	auto wideStr = convertToWide (text);
+  auto wideStr = convertToWide(text);
 
-	auto byteSize = wideStr.size () * sizeof (WCHAR);
+  auto byteSize = wideStr.size() * sizeof(WCHAR);
 
-	if (auto memory = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, byteSize))
-	{
-		if (auto* data = static_cast<WCHAR*> (GlobalLock (memory)))
-		{
+  if (auto memory = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, byteSize)) {
+    if (auto *data = static_cast<WCHAR *>(GlobalLock(memory))) {
 #if defined(__MINGW32__)
-			memcpy (data, wideStr.data (), byteSize);
+      memcpy(data, wideStr.data(), byteSize);
 #else
-			memcpy_s (data, byteSize, wideStr.data (), byteSize);
+      memcpy_s(data, byteSize, wideStr.data(), byteSize);
 #endif
-			GlobalUnlock (memory);
+      GlobalUnlock(memory);
 
-			auto handle = SetClipboardData (CF_UNICODETEXT, memory);
-			result = handle != nullptr;
-		}
-	}
+      auto handle = SetClipboardData(CF_UNICODETEXT, memory);
+      result = handle != nullptr;
+    }
+  }
 
-	return result;
+  return result;
 }
 
 //-----------------------------------------------------------------------------
-bool getTextFromClipboard (std::string& text)
-{
-	Clipboard cb;
-	if (!cb.open)
-		return false;
+bool getTextFromClipboard(std::string &text) {
+  Clipboard cb;
+  if (!cb.open)
+    return false;
 
-	if (!IsClipboardFormatAvailable (CF_UNICODETEXT))
-		return false;
+  if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
+    return false;
 
-	bool result = false;
+  bool result = false;
 
-	// Get handle of clipboard object for unicode text
-	if (auto hData = GetClipboardData (CF_UNICODETEXT))
-	{
-		// Lock the handle to get the actual text pointer
-		if (auto* data = (const WCHAR*)GlobalLock (hData))
-		{
-			auto dataSize = GlobalSize (hData);
-			text = convertToUTF8 (data, dataSize);
+  // Get handle of clipboard object for unicode text
+  if (auto hData = GetClipboardData(CF_UNICODETEXT)) {
+    // Lock the handle to get the actual text pointer
+    if (auto *data = (const WCHAR *)GlobalLock(hData)) {
+      auto dataSize = GlobalSize(hData);
+      text = convertToUTF8(data, dataSize);
 
-			// Release the lock
-			GlobalUnlock (hData);
+      // Release the lock
+      GlobalUnlock(hData);
 
-			result = true;
-		}
-	}
+      result = true;
+    }
+  }
 
-	return result;
+  return result;
 }
 
 //------------------------------------------------------------------------

@@ -39,7 +39,8 @@
 /* disable warning: no function prototype given: converting '()' to '(void)' */
 #pragma warning(disable : 4255)
 
-/* disable warning: '__cplusplus' is not defined as a preprocessor macro, replacing with '0' for '#if/#elif' */
+/* disable warning: '__cplusplus' is not defined as a preprocessor macro,
+ * replacing with '0' for '#if/#elif' */
 #pragma warning(disable : 4668)
 
 /* disable warning: 'bytes padding added after construct' */

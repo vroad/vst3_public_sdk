@@ -4,7 +4,8 @@
 // Project     : Steinberg Plug-In SDK
 // Filename    : public.sdk/source/common/systemclipboard.h
 // Created by  : Steinberg 04.2020
-// Description : Simple helper allowing to copy/retrieve text to/from the system clipboard
+// Description : Simple helper allowing to copy/retrieve text to/from the system
+// clipboard
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -21,14 +22,14 @@
 //
 // THIS SDK IS PROVIDED BY STEINBERG MEDIA TECHNOLOGIES GMBH "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL STEINBERG MEDIA TECHNOLOGIES GMBH BE LIABLE FOR
+// ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #pragma once
@@ -46,7 +47,7 @@ namespace SystemClipboard {
 \param text UTF-8 encoded text
 \return true on success
 */
-bool copyTextToClipboard (const std::string& text);
+bool copyTextToClipboard(const std::string &text);
 
 //-----------------------------------------------------------------------------
 /** Retrieves the current text from the system clipboard
@@ -55,7 +56,7 @@ bool copyTextToClipboard (const std::string& text);
 \param text UTF-8 encoded text
 \return true on success
 */
-bool getTextFromClipboard (std::string& text);
+bool getTextFromClipboard(std::string &text);
 
 //-----------------------------------------------------------------------------
 } // namespace SystemClipboard

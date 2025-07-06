@@ -2,7 +2,8 @@
 // Project     : VST SDK
 //
 // Category    : Examples
-// Filename    : public.sdk/samples/vst/note_expression_synth/source/note_touch_controller.cpp
+// Filename    :
+// public.sdk/samples/vst/note_expression_synth/source/note_touch_controller.cpp
 // Created by  : Steinberg, 08/2013
 // Description :
 //
@@ -10,8 +11,8 @@
 // LICENSE
 // (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
 //
 //   * Redistributions of source code must retain the above copyright notice,
 //     this list of conditions and the following disclaimer.
@@ -22,16 +23,17 @@
 //     contributors may be used to endorse or promote products derived from this
 //     software without specific prior written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-// OF THE POSSIBILITY OF SUCH DAMAGE.
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
 #include "note_touch_controller.h"
@@ -45,113 +47,96 @@ using VstEventTypes = Steinberg::Vst::Event::EventTypes;
 namespace VSTGUI {
 
 //-----------------------------------------------------------------------------
-NoteTouchController::NoteTouchController (int32_t pitch, Steinberg::Vst::IInterAppAudioHost* host)
-: host (host), pad (nullptr), pitch (pitch), noteID (-1), xNEType (-1), yNEType (-1)
-{
+NoteTouchController::NoteTouchController(
+    int32_t pitch, Steinberg::Vst::IInterAppAudioHost *host)
+    : host(host), pad(nullptr), pitch(pitch), noteID(-1), xNEType(-1),
+      yNEType(-1) {}
+
+//-----------------------------------------------------------------------------
+void NoteTouchController::startNote(float velocity) {
+  VstEvent e = {};
+  e.type = VstEventTypes::kNoteOnEvent;
+  e.noteOn.pitch = pitch;
+  e.noteOn.velocity = velocity;
+  if (host->scheduleEventFromUI(e) == kResultTrue) {
+    noteID = e.noteOn.noteId;
+    pad->setBackColor(kGreyCColor);
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NoteTouchController::startNote (float velocity)
-{
-	VstEvent e = {};
-	e.type = VstEventTypes::kNoteOnEvent;
-	e.noteOn.pitch = pitch;
-	e.noteOn.velocity = velocity;
-	if (host->scheduleEventFromUI (e) == kResultTrue)
-	{
-		noteID = e.noteOn.noteId;
-		pad->setBackColor (kGreyCColor);
-	}
+void NoteTouchController::stopNote(float velocity) {
+  if (noteID != -1) {
+    VstEvent e = {};
+    e.type = VstEventTypes::kNoteOffEvent;
+    e.noteOff.noteId = noteID;
+    e.noteOff.pitch = pitch;
+    e.noteOff.velocity = velocity;
+    host->scheduleEventFromUI(e);
+    noteID = -1;
+    pad->setBackColor(originalPadBackgroundColor);
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NoteTouchController::stopNote (float velocity)
-{
-	if (noteID != -1)
-	{
-		VstEvent e = {};
-		e.type = VstEventTypes::kNoteOffEvent;
-		e.noteOff.noteId = noteID;
-		e.noteOff.pitch = pitch;
-		e.noteOff.velocity = velocity;
-		host->scheduleEventFromUI (e);
-		noteID = -1;
-		pad->setBackColor (originalPadBackgroundColor);
-	}
+void NoteTouchController::sendNoteExpression(int32_t type, float value) {
+  if (type != -1 && noteID != -1) {
+    VstEvent e = {};
+    e.type = VstEventTypes::kNoteExpressionValueEvent;
+    e.noteExpressionValue.noteId = noteID;
+    e.noteExpressionValue.typeId = type;
+    if (type == Vst::kTuningTypeID) {
+      value = ((value - 0.5f) * 0.1f + 0.5f);
+    } else if (type == Vst::kVolumeTypeID) {
+      value = 0.3f * value;
+    }
+    e.noteExpressionValue.value = value;
+    host->scheduleEventFromUI(e);
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NoteTouchController::sendNoteExpression (int32_t type, float value)
-{
-	if (type != -1 && noteID != -1)
-	{
-		VstEvent e = {};
-		e.type = VstEventTypes::kNoteExpressionValueEvent;
-		e.noteExpressionValue.noteId = noteID;
-		e.noteExpressionValue.typeId = type;
-		if (type == Vst::kTuningTypeID)
-		{
-			value = ((value - 0.5f) * 0.1f + 0.5f);
-		}
-		else if (type == Vst::kVolumeTypeID)
-		{
-			value = 0.3f * value;
-		}
-		e.noteExpressionValue.value = value;
-		host->scheduleEventFromUI (e);
-	}
+void NoteTouchController::controlBeginEdit(CControl *pControl) {
+  if (pControl == pad) {
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NoteTouchController::controlBeginEdit (CControl* pControl)
-{
-	if (pControl == pad)
-	{
-	}
+void NoteTouchController::controlEndEdit(CControl *pControl) {
+  if (pControl == pad) {
+    float x, y;
+    CXYPad::calculateXY(pad->getValue(), x, y);
+    stopNote(y);
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NoteTouchController::controlEndEdit (CControl* pControl)
-{
-	if (pControl == pad)
-	{
-		float x, y;
-		CXYPad::calculateXY (pad->getValue (), x, y);
-		stopNote (y);
-	}
-}
-
-//-----------------------------------------------------------------------------
-void NoteTouchController::valueChanged (CControl* pControl)
-{
-	if (pControl == pad)
-	{
-		float x, y;
-		CXYPad::calculateXY (pad->getValue (), x, y);
-		if (noteID == -1)
-		{
-			float velocity = logf (y + 0.4f) + 0.8f;
+void NoteTouchController::valueChanged(CControl *pControl) {
+  if (pControl == pad) {
+    float x, y;
+    CXYPad::calculateXY(pad->getValue(), x, y);
+    if (noteID == -1) {
+      float velocity = logf(y + 0.4f) + 0.8f;
 #if DEBUG_LOG
-			FDebugPrint ("%f\n", velocity);
+      FDebugPrint("%f\n", velocity);
 #endif
-			startNote (velocity);
-		}
-		sendNoteExpression (xNEType, x);
-		sendNoteExpression (yNEType, y);
-	}
+      startNote(velocity);
+    }
+    sendNoteExpression(xNEType, x);
+    sendNoteExpression(yNEType, y);
+  }
 }
 
 //-----------------------------------------------------------------------------
-CView* NoteTouchController::verifyView (CView* view, const UIAttributes& attributes,
-                                        const IUIDescription* description)
-{
-	if (pad == nullptr)
-	{
-		pad = dynamic_cast<CXYPad*> (view);
-		pad->setListener (this);
-		pad->setStopTrackingOnMouseExit (true);
-		originalPadBackgroundColor = pad->getBackColor ();
-	}
-	return view;
+CView *NoteTouchController::verifyView(CView *view,
+                                       const UIAttributes &attributes,
+                                       const IUIDescription *description) {
+  if (pad == nullptr) {
+    pad = dynamic_cast<CXYPad *>(view);
+    pad->setListener(this);
+    pad->setStopTrackingOnMouseExit(true);
+    originalPadBackgroundColor = pad->getBackColor();
+  }
+  return view;
 }
-}
+} // namespace VSTGUI
